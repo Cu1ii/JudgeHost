@@ -1,0 +1,5 @@
+app:
+  env: dev
+  port: 8000
+  app_name: JudgeHost
+  app_url: http://localhost
