@@ -94,6 +94,13 @@ var LanguageScript = map[string]string{
 		"g++ -Wall -O2 CODE_PATH -o run",
 }
 
+var Language = map[string]string{
+	"PYTHON":      "py",
+	"JAVA":        "java",
+	"C":           "c",
+	"C_PLUS_PLUS": "cpp",
+}
+
 func GetBuildScriptByRunningPath(languageType, submissionPath, codePath string) (path string, err error) {
 	if script, ok := LanguageScript[languageType]; ok {
 		path = strings.Replace(strings.Replace(script, "SUBMISSION_PATH", submissionPath, -1),

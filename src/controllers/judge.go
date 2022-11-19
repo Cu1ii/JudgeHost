@@ -9,9 +9,22 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sync"
 )
 
 var JudgeService *service.JudgeService = service.NewJudgeService(configuration.JudgeEnvironmentConfigurationEntity)
+
+type JudgeTask struct {
+	JudgeDTO    *dto.JudgeDTO
+	JudgeResult []*dto.SingleJudgeResultDTO
+	Message     string
+}
+
+func (j *JudgeTask) Do() {
+	j.JudgeResult = JudgeService.RunJudge(j.JudgeDTO)
+	j.JudgeResult[0].SetMessage()
+	j.Message = j.JudgeResult[0].Message
+}
 
 func LoadJudgeControllers(e *gin.Engine) {
 	judgeGroup := e.Group("/judge")
@@ -30,5 +43,12 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
-	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("Respone sueccess", judgeDTO))
+	judgeTask := JudgeTask{
+		JudgeDTO: &judgeDTO,
+	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	judgeTaskWrop := configuration.NewTaskWrop(&judgeTask, &wg)
+	configuration.JudgeExecutorPool.Invoke(&judgeTaskWrop)
+	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("judge result", judgeTask.JudgeResult))
 }

@@ -55,7 +55,8 @@ func JudgeEnvironmentInitializeConfig() *JudgeEnvironmentConfiguration {
 	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("read config failed: %s \n", err))
+		// TODO logger
+		fmt.Println("read config failed: %s \n", err)
 	}
 
 	// 监听配置文件
