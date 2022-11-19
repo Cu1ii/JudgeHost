@@ -13,6 +13,6 @@ package dto
  */
 
 type SolutionDTO struct {
-	StdIn          string
-	ExpectedStdOut string
+	StdIn          string `json:"std_in,omitempty"`
+	ExpectedStdOut string `json:"expected_std_out,omitempty"`
 }

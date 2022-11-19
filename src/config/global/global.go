@@ -105,6 +105,7 @@ func GetBuildScriptByRunningPath(languageType, submissionPath, codePath string) 
 	if script, ok := LanguageScript[languageType]; ok {
 		path = strings.Replace(strings.Replace(script, "SUBMISSION_PATH", submissionPath, -1),
 			"CODE_PATH", codePath, -1)
+		return
 	}
 	return "", errors.New("languageScript not exist")
 }
@@ -119,7 +120,7 @@ func appInitializeConfig() *app.Configuration {
 	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("read config failed: %s \n", err))
+		fmt.Println("read config failed: %s \n", err)
 	}
 
 	// 监听配置文件

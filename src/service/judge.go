@@ -7,6 +7,7 @@ import (
 	"JudgeHost/src/models/dto"
 	"JudgeHost/src/util"
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -66,22 +67,22 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	useId := s.UseDefaultUid
-	if isJava := judgeDTO.Language == "JAVA"; isJava {
-		useId = s.UseRootUid
-	}
+	//useId := s.UseDefaultUid
+	//if isJava := judgeDTO.Language == "JAVA"; isJava {
+	//	useId = s.UseRootUid
+	//}
 	compileCommand := exec.Command(compileScript,
 		submissionWorkingPath,
 		codePath,
 		judgeDTO.SubmissionCode,
 		buildScript,
 		judgeCoreScript,
-		strconv.FormatInt(int64(useId), 10),
+		strconv.FormatInt(int64(0), 10),
 		strconv.FormatInt(int64(s.CompileOutMaxSize), 10),
 	)
 	if err := compileCommand.Run(); err != nil {
 		// TODO logger
-		fmt.Println(err.Error())
+		fmt.Println("compileCommand.Run", err.Error())
 		return nil, err
 	}
 	return s.ReadFile(submissionWorkingPath + "/" + util.CompileStdErrName)
@@ -90,8 +91,10 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 // RunJudge 执行判题
 func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResultDTO {
 	judgeConfigurationBO := bo.JudgeConfigurationBO{
+		SubmissionId:   1,
 		JudgeConfig:    judgeDTO,
 		SubmissionPath: s.JudgeEnvironmentConfiguration.JudgeEnvironment.SubmissionPath,
+		WorkPath:       s.JudgeEnvironmentConfiguration.JudgeEnvironment.SubmissionPath,
 		ScriptPath:     s.JudgeEnvironmentConfiguration.JudgeEnvironment.ScriptPath,
 		ResolutionPath: s.JudgeEnvironmentConfiguration.JudgeEnvironment.ResolutionPath,
 	}
@@ -230,39 +233,28 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 		"-i", stdInPath,
 		"-g", strconv.FormatInt(int64(isGuard), 10),
 	)
-	if err := judgeCommand.Start(); err != nil {
+	var stdout bytes.Buffer
+	judgeCommand.Stdout = &stdout
+	if err := judgeCommand.Run(); err != nil {
 		// TODO logger
 		log.Printf("cmd.Start error: %v", err)
 		return nil, err
 	}
-	result, err := s.ReadStdout(judgeCommand)
-	if err != nil {
-		// TODO logger
-		log.Printf("cmd.Start error: %v", err)
-		return nil, err
-	}
-	if err := judgeCommand.Wait(); err != nil {
-		// TODO logger
-		log.Printf("cmd.Wait error: %v", err)
-		return nil, err
-	}
-	toString := util.StringListToString(result)
+
+	resultJson := stdout.String()
+	fmt.Println("[DEBUG] service/judge.go:245 ", resultJson)
 	singleJudgeResultDTO := dto.SingleJudgeResultDTO{}
-	if err := json.Unmarshal([]byte(toString), &singleJudgeResultDTO); err != nil {
+	if err := json.Unmarshal([]byte(resultJson), &singleJudgeResultDTO); err != nil {
 		// TODO logger
 		log.Printf("json.Unmarshal error: %v", err)
 		return nil, err
 	}
+	fmt.Println("[DEBUG] service/judge.go:252 ", singleJudgeResultDTO)
 	return &singleJudgeResultDTO, nil
 }
 
-func (s *JudgeService) ReadStdout(cmd *exec.Cmd) ([]string, error) {
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		// TODO logger
-		log.Printf("cmd.StdoutPipe error: %v", err)
-		return nil, err
-	}
+// ReadStdout 准备废弃
+func (s *JudgeService) ReadStdout(stdout io.ReadCloser) ([]string, error) {
 	reader := bufio.NewReader(stdout)
 	result := []string{}
 	//实时循环读取输出流中的一行内容

@@ -6,9 +6,9 @@ import (
 )
 
 type SingleJudgeResultDTO struct {
-	RealTimeCost string
-	MemoryCost   string
-	CpuTimeCost  string
+	RealTimeCost int
+	MemoryCost   int
+	CpuTimeCost  int
 	Condition    int
 	StdInPath    string
 	StdOutPath   string

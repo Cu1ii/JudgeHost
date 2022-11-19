@@ -22,8 +22,11 @@ type JudgeTask struct {
 
 func (j *JudgeTask) Do() {
 	j.JudgeResult = JudgeService.RunJudge(j.JudgeDTO)
-	j.JudgeResult[0].SetMessage()
-	j.Message = j.JudgeResult[0].Message
+	if len(j.JudgeResult) > 0 {
+		j.JudgeResult[0].SetMessage()
+		j.Message = j.JudgeResult[0].Message
+	}
+
 }
 
 func LoadJudgeControllers(e *gin.Engine) {
@@ -37,6 +40,8 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
+	fmt.Println(judgeDTO)
+	fmt.Println(*judgeDTO.Solutions[0])
 	if err := util.ValidateStructCheck(&judgeDTO); err != nil {
 		// TODO logger
 		fmt.Println(err)
@@ -46,9 +51,11 @@ func RunJudge(context *gin.Context) {
 	judgeTask := JudgeTask{
 		JudgeDTO: &judgeDTO,
 	}
+	judgeTask.JudgeResult = make([]*dto.SingleJudgeResultDTO, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	judgeTaskWrop := configuration.NewTaskWrop(&judgeTask, &wg)
-	configuration.JudgeExecutorPool.Invoke(&judgeTaskWrop)
+	configuration.JudgeExecutorPool.Invoke(judgeTaskWrop)
+	wg.Wait()
 	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("judge result", judgeTask.JudgeResult))
 }
