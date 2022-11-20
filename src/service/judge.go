@@ -67,25 +67,41 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	//useId := s.UseDefaultUid
-	//if isJava := judgeDTO.Language == "JAVA"; isJava {
-	//	useId = s.UseRootUid
-	//}
+	useId := s.UseDefaultUid
+	if isJava := judgeDTO.Language == "JAVA"; isJava {
+		useId = s.UseRootUid
+	}
+
+	//fmt.Println("[DEBUG] service/judge.go:75 ", compileScript, " 1|\n",
+	//	submissionWorkingPath, " 2|\n",
+	//	codePath, " 3|\n",
+	//	judgeDTO.SubmissionCode, " 4|\n",
+	//	buildScript, " 5|\n",
+	//	judgeCoreScript, " 6|\n",
+	//	strconv.FormatInt(int64(useId), 10), " 7|\n",
+	//	strconv.FormatInt(int64(s.CompileOutMaxSize), 10), " 8|\n",
+	//)
+
 	compileCommand := exec.Command(compileScript,
 		submissionWorkingPath,
 		codePath,
 		judgeDTO.SubmissionCode,
 		buildScript,
 		judgeCoreScript,
-		strconv.FormatInt(int64(0), 10),
+		strconv.FormatInt(int64(useId), 10),
 		strconv.FormatInt(int64(s.CompileOutMaxSize), 10),
 	)
+	// [DEBUG]: TEST
+	compileCommand = exec.Command("/home/cu1/test/test_compile.sh",
+		"/home/cu1/test/submission")
+
 	if err := compileCommand.Run(); err != nil {
 		// TODO logger
 		fmt.Println("compileCommand.Run", err.Error())
 		return nil, err
 	}
-	return s.ReadFile(submissionWorkingPath + "/" + util.CompileStdErrName)
+	// return s.ReadFile(submissionWorkingPath + "/" + util.CompileStdErrName)
+	return s.ReadFile("/home/cu1/test/submission" + "/" + util.CompileStdErrName)
 }
 
 // RunJudge 执行判题
@@ -107,11 +123,25 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResult
 		fmt.Println(err.Error())
 	}
 	util.SetExtraInfo(compileResult)
+
+	fmt.Println("[DEBUG] service/judge.go: 127", compileResult)
+
 	result := []*dto.SingleJudgeResultDTO{}
 	if s.IsCompileSuccess(compileResult) {
+		fmt.Println("[DEBUG] service/judge.go: 128", "IsCompileSuccess Success!")
 		totalSolutions := judgeDTO.Solutions
+
+		// DEBUG DATA
+		totalSolutions = append(judgeDTO.Solutions, &dto.SolutionDTO{})
+
 		for index, solution := range totalSolutions {
+
+			fmt.Println("[DEBUG] service/judge.go: 139", *solution)
+
 			singleJudgeResult, err := s.RunForSingleJudge(solution, index)
+
+			fmt.Println("[DEBUG] service/judge.go: 143", *singleJudgeResult)
+
 			if err != nil {
 				break
 			}
@@ -154,9 +184,12 @@ func (s *JudgeService) ReadFile(filePath string) ([]string, error) {
 }
 
 func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int) (*dto.SingleJudgeResultDTO, error) {
-	singleJudgeRunningName := "running_" + strconv.FormatInt(int64(index), 10)
+	singleJudgeRunningName := "running_" + strconv.FormatInt(int64(index+1), 10)
 	input, output := s.GetResolutionInputAndOutputFile(solutionDTO)
 	judging, err := s.StartJudging(input, singleJudgeRunningName)
+
+	fmt.Println("[DEBUG] service/judge.go:191 ", *judging)
+
 	if err != nil {
 		// TODO logger
 		log.Printf("StartJudging error: %v", err)
@@ -168,9 +201,23 @@ func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int
 		log.Printf("ReadFile error: %v", err)
 		return nil, err
 	}
+
 	if len(judgeCoreStdErr) == 0 {
+
+		fmt.Println("[DEBUG] service/judge.go:207 ", len(judgeCoreStdErr))
+
 		isSuccess := judging.Condition == 1
+		// DEBUG
+		output = "/home/cu1/test/submission/exp.out"
 		isPass, err := s.CompareOutputWithResolutions(judging.StdOutPath, output)
+
+		// DEBUG
+		if !isPass {
+			judging.Condition = global.JudgeResult["WRONG_ANSWER"]
+		}
+
+		fmt.Println("[DEBUG] service/judge.go:211 ", isPass, "stdout:",
+			judging.StdOutPath, " output: ", output)
 		if err != nil {
 			// TODO logger
 			log.Printf("CompareOutputWithResolutions error: %v", err)
@@ -195,19 +242,22 @@ func (s *JudgeService) GetResolutionInputAndOutputFile(solution *dto.SolutionDTO
 
 func (s *JudgeService) CompareOutputWithResolutions(submissionOutput, expectedOutput string) (bool, error) {
 	compareScript := util.GetCompareScriptPath()
+
+	// DEBUG
+	fmt.Println("[DEBUG] service/judge.go:247 ", compareScript)
+
 	compareCommand := exec.Command(compareScript, submissionOutput, expectedOutput)
-	if err := compareCommand.Start(); err != nil {
-		// TODO logger
-		log.Printf("compareCommand.Start error: %v", err)
-		return false, err
-	}
-	if err := compareCommand.Wait(); err != nil {
+	var exitOut bytes.Buffer
+	compareCommand.Stdout = &exitOut
+	if err := compareCommand.Run(); err != nil {
 		// TODO logger
 		log.Printf("compareCommand.Wait error: %v", err)
 		return false, err
 	}
-
-	return true, nil
+	exitCode := exitOut.String()
+	fmt.Println("[DEBUG] service/judge.go:257 ", "0" == exitCode)
+	fmt.Println("[DEBUG] service/judge.go:258 ", exitCode)
+	return strings.Contains(exitCode, "0"), nil
 }
 
 func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeResultDTO, error) {
@@ -233,6 +283,11 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 		"-i", stdInPath,
 		"-g", strconv.FormatInt(int64(isGuard), 10),
 	)
+
+	// [DEBUG]: TEST
+	judgeCommand = exec.Command("/home/cu1/test/judge_test.sh",
+		"/home/cu1/test/submission")
+
 	var stdout bytes.Buffer
 	judgeCommand.Stdout = &stdout
 	if err := judgeCommand.Run(); err != nil {
@@ -242,14 +297,15 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 	}
 
 	resultJson := stdout.String()
-	fmt.Println("[DEBUG] service/judge.go:245 ", resultJson)
+	fmt.Println("[DEBUG] service/judge.go:280 ", resultJson)
 	singleJudgeResultDTO := dto.SingleJudgeResultDTO{}
 	if err := json.Unmarshal([]byte(resultJson), &singleJudgeResultDTO); err != nil {
 		// TODO logger
 		log.Printf("json.Unmarshal error: %v", err)
 		return nil, err
 	}
-	fmt.Println("[DEBUG] service/judge.go:252 ", singleJudgeResultDTO)
+	fmt.Println("[DEBUG] service/judge.go:287 ", singleJudgeResultDTO)
+	fmt.Println("[DEBUG] service/judge.go:288 ", "back")
 	return &singleJudgeResultDTO, nil
 }
 

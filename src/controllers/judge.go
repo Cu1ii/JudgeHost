@@ -40,8 +40,6 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
-	fmt.Println(judgeDTO)
-	fmt.Println(*judgeDTO.Solutions[0])
 	if err := util.ValidateStructCheck(&judgeDTO); err != nil {
 		// TODO logger
 		fmt.Println(err)
