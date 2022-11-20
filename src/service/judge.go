@@ -92,16 +92,17 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 		strconv.FormatInt(int64(s.CompileOutMaxSize), 10),
 	)
 	// [DEBUG]: TEST
-	compileCommand = exec.Command("/home/cu1/test/test_compile.sh",
-		"/home/cu1/test/submission")
+	//compileCommand = exec.Command("/home/cu1/test/test_compile.sh",
+	//	"/home/cu1/test/submission")
 
 	if err := compileCommand.Run(); err != nil {
 		// TODO logger
 		fmt.Println("compileCommand.Run", err.Error())
 		return nil, err
 	}
-	// return s.ReadFile(submissionWorkingPath + "/" + util.CompileStdErrName)
-	return s.ReadFile("/home/cu1/test/submission" + "/" + util.CompileStdErrName)
+	return s.ReadFile(submissionWorkingPath + "/" + util.CompileStdErrName)
+	// [DEBUG]: TEST
+	// return s.ReadFile("/home/cu1/test/submission" + "/" + util.CompileStdErrName)
 }
 
 // RunJudge 执行判题
@@ -207,8 +208,8 @@ func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int
 		fmt.Println("[DEBUG] service/judge.go:207 ", len(judgeCoreStdErr))
 
 		isSuccess := judging.Condition == 1
-		// DEBUG
-		output = "/home/cu1/test/submission/exp.out"
+		// [DEBUG]:  TEST
+		// output = "/home/cu1/test/submission/exp.out"
 		isPass, err := s.CompareOutputWithResolutions(judging.StdOutPath, output)
 
 		// DEBUG
@@ -243,7 +244,7 @@ func (s *JudgeService) GetResolutionInputAndOutputFile(solution *dto.SolutionDTO
 func (s *JudgeService) CompareOutputWithResolutions(submissionOutput, expectedOutput string) (bool, error) {
 	compareScript := util.GetCompareScriptPath()
 
-	// DEBUG
+	// [DEBUG]: TEST
 	fmt.Println("[DEBUG] service/judge.go:247 ", compareScript)
 
 	compareCommand := exec.Command(compareScript, submissionOutput, expectedOutput)
@@ -285,8 +286,8 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 	)
 
 	// [DEBUG]: TEST
-	judgeCommand = exec.Command("/home/cu1/test/judge_test.sh",
-		"/home/cu1/test/submission")
+	//judgeCommand = exec.Command("/home/cu1/test/judge_test.sh",
+	//	"/home/cu1/test/submission")
 
 	var stdout bytes.Buffer
 	judgeCommand.Stdout = &stdout
