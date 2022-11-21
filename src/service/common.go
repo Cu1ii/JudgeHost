@@ -7,6 +7,7 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/sirupsen/logrus"
 	"runtime"
 	"time"
 )
@@ -56,8 +57,7 @@ func (c *CommonService) GetJudgeHostCondition() *bo.JudgeHostConditionBO {
 func (c *CommonService) GetCpuCostPercentage() int {
 	totalPercent, err := cpu.Percent(1*time.Second, false)
 	if err != nil {
-		// TODO logger
-		fmt.Println(err.Error())
+		logrus.Debug("get cpu cost percentage fail", err.Error())
 		return -1
 	}
 	return int(totalPercent[0] * 100)
@@ -67,8 +67,7 @@ func (c *CommonService) GetCpuCostPercentage() int {
 func (c *CommonService) GetMemoryCostPercentage() int {
 	memory, err := mem.VirtualMemory()
 	if err != nil {
-		// TODO logger
-		fmt.Println(err.Error())
+		logrus.Debug("get memory cost percentage fail", err.Error())
 		return -1
 	}
 	totalVirtualMemory := memory.Total
@@ -78,10 +77,9 @@ func (c *CommonService) GetMemoryCostPercentage() int {
 }
 
 func (c *CommonService) SetJudgeHostWorkingAmount(corePoolSize int, isForceSet bool) {
-	isHavingWorkingNode := (c.JudgeExecutorPool.Running() != 0)
+	isHavingWorkingNode := c.JudgeExecutorPool.Running() != 0
 	if !isForceSet && isHavingWorkingNode {
-		// TODO logger
-		fmt.Println("has task in working set fail")
+		logrus.Debug("has task in working set fail")
 		return
 	}
 	c.JudgeExecutorPool.Tune(corePoolSize)

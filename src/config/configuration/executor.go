@@ -1,8 +1,8 @@
 package configuration
 
 import (
-	"fmt"
 	"github.com/panjf2000/ants/v2"
+	"github.com/sirupsen/logrus"
 	"runtime"
 	"time"
 )
@@ -40,11 +40,6 @@ func init() {
 		Nonblocking:      NONBLOCKING,
 	}))
 	if err != nil {
-		// TODO 加入日志
-		fmt.Println(err.Error())
+		logrus.Error("judgeExecutorPool init fail: ", err.Error())
 	}
-}
-
-func GetJudgeExecutorPool() *ants.PoolWithFunc {
-	return JudgeExecutorPool
 }

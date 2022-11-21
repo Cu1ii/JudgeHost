@@ -1,11 +1,11 @@
 package util
 
 import (
-	"fmt"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	zhs "github.com/go-playground/validator/v10/translations/zh"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -19,7 +19,7 @@ var (
 func init() {
 	// 注册翻译器
 	if err := zhs.RegisterDefaultTranslations(validate, trans); err != nil {
-		fmt.Println("[ERROR] util-validate.go-19: ", err.Error(), time.Now().UTC().String())
+		logrus.Debug("register default translations fail: ", err.Error(), time.Now().UTC().String())
 	}
 }
 
@@ -28,8 +28,7 @@ func ValidateStructCheck(verifyEntity interface{}) validator.ValidationErrorsTra
 		if verifyErrors, ok := err.(validator.ValidationErrors); ok {
 			return verifyErrors.Translate(trans)
 		}
-		// TODO logger
-		fmt.Println(err.Error())
+		logrus.Debug("validate struct check error not validation errors: ", err.Error())
 		return nil
 	}
 	return nil

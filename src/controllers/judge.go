@@ -6,8 +6,8 @@ import (
 	"JudgeHost/src/models/dto"
 	"JudgeHost/src/service"
 	"JudgeHost/src/util"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
 )
@@ -41,8 +41,7 @@ func RunJudge(context *gin.Context) {
 		return
 	}
 	if err := util.ValidateStructCheck(&judgeDTO); err != nil {
-		// TODO logger
-		fmt.Println(err)
+		logrus.Debug("ValidateStructCheck error", err)
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}

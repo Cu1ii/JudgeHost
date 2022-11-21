@@ -5,6 +5,7 @@ import (
 	"JudgeHost/src/util"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -55,8 +56,7 @@ func JudgeEnvironmentInitializeConfig() *JudgeEnvironmentConfiguration {
 	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		// TODO logger
-		fmt.Println("read config failed: %s \n", err)
+		logrus.Error("read config failed: ", err.Error())
 	}
 
 	// 监听配置文件

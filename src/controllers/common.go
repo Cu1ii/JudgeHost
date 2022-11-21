@@ -8,8 +8,8 @@ import (
 	"JudgeHost/src/models/vo"
 	"JudgeHost/src/service"
 	"JudgeHost/src/util"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -47,8 +47,7 @@ func SetMaxWorkingAmount(context *gin.Context) {
 		return
 	}
 	if err := util.ValidateStructCheck(workingAmountDTO); err != nil {
-		// TODO logger
-		fmt.Println(err)
+		logrus.Debug("ValidateStructCheck error", err)
 		context.JSON(500, gin.H{"msg": err})
 	}
 	CommonService.SetJudgeHostWorkingAmount(workingAmountDTO.MaxWorkingAmount, workingAmountDTO.ForceSet)

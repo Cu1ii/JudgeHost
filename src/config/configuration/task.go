@@ -1,7 +1,7 @@
 package configuration
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -32,7 +32,6 @@ func NewTaskWrop(task Task, wg *sync.WaitGroup) *TaskWrop {
 func TaskFunc(data interface{}) {
 	taskWrop := data.(*TaskWrop)
 	taskWrop.Task.Do()
-	// TODO 添加日志
-	fmt.Println(taskWrop.Name)
+	logrus.Info("taskWrop.Name: ", taskWrop.Name)
 	taskWrop.Wg.Done()
 }
