@@ -11,7 +11,7 @@ import (
 
 // 全局配置
 
-var GlobalSubmissionId int64 = 1
+var GlobalSubmissionId int64
 
 var JudgeConfigDefault = map[string]int{
 	// cpu时间限制 4000ms

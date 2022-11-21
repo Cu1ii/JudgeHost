@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync/atomic"
 )
 
 type JudgeService struct {
@@ -107,8 +108,9 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 
 // RunJudge 执行判题
 func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResultDTO {
+	curId := atomic.AddInt64(&global.GlobalSubmissionId, 1)
 	judgeConfigurationBO := bo.JudgeConfigurationBO{
-		SubmissionId:   1,
+		SubmissionId:   curId,
 		JudgeConfig:    judgeDTO,
 		SubmissionPath: s.JudgeEnvironmentConfiguration.JudgeEnvironment.SubmissionPath,
 		WorkPath:       s.JudgeEnvironmentConfiguration.JudgeEnvironment.SubmissionPath,
@@ -133,13 +135,13 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResult
 		totalSolutions := judgeDTO.Solutions
 
 		// DEBUG DATA
-		totalSolutions = append(judgeDTO.Solutions, &dto.SolutionDTO{})
+		// totalSolutions = append(judgeDTO.Solutions, &dto.SolutionDTO{})
 
 		for index, solution := range totalSolutions {
 
 			fmt.Println("[DEBUG] service/judge.go: 139", *solution)
 
-			singleJudgeResult, err := s.RunForSingleJudge(solution, index)
+			singleJudgeResult, err := s.RunForSingleJudge(solution, index+1)
 
 			fmt.Println("[DEBUG] service/judge.go: 143", *singleJudgeResult)
 
@@ -185,7 +187,7 @@ func (s *JudgeService) ReadFile(filePath string) ([]string, error) {
 }
 
 func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int) (*dto.SingleJudgeResultDTO, error) {
-	singleJudgeRunningName := "running_" + strconv.FormatInt(int64(index+1), 10)
+	singleJudgeRunningName := "running_" + strconv.FormatInt(int64(index), 10)
 	input, output := s.GetResolutionInputAndOutputFile(solutionDTO)
 	judging, err := s.StartJudging(input, singleJudgeRunningName)
 
@@ -273,7 +275,8 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 	if isCppFamily {
 		isGuard = s.EnableJudgeCoreGuard
 	}
-	judgeCommand := exec.Command(coreScript,
+	rootCommand := exec.Command("echo", "370802wsl")
+	judgeCommand := exec.Command("sudo", "-S", coreScript,
 		"-r", util.GetRunnerScriptPath(),
 		"-o", workingPath+"/"+name+".out",
 		"-t", strconv.FormatInt(int64(judgeConfig.RealTimeLimit), 10),
@@ -285,18 +288,31 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 		"-g", strconv.FormatInt(int64(isGuard), 10),
 	)
 
-	// [DEBUG]: TEST
-	//judgeCommand = exec.Command("/home/cu1/test/judge_test.sh",
-	//	"/home/cu1/test/submission")
+	judgeCommand.Stdin, _ = rootCommand.StdoutPipe()
 
 	var stdout bytes.Buffer
 	judgeCommand.Stdout = &stdout
-	if err := judgeCommand.Run(); err != nil {
+	if err := judgeCommand.Start(); err != nil {
 		// TODO logger
 		log.Printf("cmd.Start error: %v", err)
 		return nil, err
 	}
 
+	if err := rootCommand.Run(); err != nil {
+		// TODO logger
+		fmt.Println("[ERROR] service/judge.go: 290", err.Error())
+		return nil, err
+	}
+
+	if err := judgeCommand.Wait(); err != nil {
+		// TODO logger
+		log.Printf("cmd.Wait error: %v", err)
+		return nil, err
+	}
+
+	// [DEBUG]: TEST
+	//judgeCommand = exec.Command("/home/cu1/test/judge_test.sh",
+	//	"/home/cu1/test/submission")
 	resultJson := stdout.String()
 	fmt.Println("[DEBUG] service/judge.go:280 ", resultJson)
 	singleJudgeResultDTO := dto.SingleJudgeResultDTO{}
