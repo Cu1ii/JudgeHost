@@ -1,6 +1,6 @@
 # JudgeHost 用户文档
 
-这是 Online Judge 平台的**判题服务器模块**, 基于 Go 编写, 在 Linux 下运行
+这是 Online Judge 平台的**判题服务器模块**, 基于 YuJudge-Online-Judge JudgeHost的 Go 的重构版本, 在 Linux 下运行
 
 本程序基于调用 YuJudge Online Judge 平台提供的**判题核心**来对题目结果进行判断, 即该判题服务器（JudgeHost）负责接收用户的提交并将代码**编译、运行、比较，并返回判断情况**其中，代码运行的核心被单独分离在这个仓库  [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core), 考虑到判题的速度、短时间内可能需要大量判题，JudgeHost可能需要考虑多线程、集群相关
 
