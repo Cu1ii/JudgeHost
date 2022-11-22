@@ -241,7 +241,7 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 	if isCppFamily {
 		isGuard = s.EnableJudgeCoreGuard
 	}
-	rootCommand := exec.Command("echo", "370802wsl")
+	rootCommand := exec.Command("echo", "your root password")
 	judgeCommand := exec.Command("sudo", "-S", coreScript,
 		"-r", util.GetRunnerScriptPath(),
 		"-o", workingPath+"/"+name+".out",
