@@ -2,7 +2,7 @@
 
 这是 Online Judge 平台的**判题服务器模块**, 基于 YuJudge-Online-Judge JudgeHost的 Go 的重构版本, 在 Linux 下运行
 
-本程序基于调用 YuJudge Online Judge 平台提供的**判题核心**来对题目结果进行判断, 即该判题服务器（JudgeHost）负责接收用户的提交并将代码**编译、运行、比较，并返回判断情况**其中，代码运行的核心被单独分离在这个仓库  [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core), 考虑到判题的速度、短时间内可能需要大量判题，JudgeHost可能需要考虑多线程、集群相关
+本程序基于调用 YuJudge-Online-Judge 平台提供的**判题核心**来对题目结果进行判断, 即该判题服务器（JudgeHost）负责接收用户的提交并将代码**编译、运行、比较，并返回判断情况**其中，代码运行的核心被单独分离在这个仓库  [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core), 考虑到判题的速度、短时间内可能需要大量判题，JudgeHost可能需要考虑多线程、集群相关
 
 后续会提供 **Docker 环境**作为运行环境
 
@@ -12,7 +12,13 @@
 git clone https://github.com/Cu1ii/JudgeHost.git
 ```
 
+### 使用了
 
+- [Gin](https://github.com/gin-gonic/gin)
+- [logrus](https://github.com/sirupsen/logrus)
+- [ants](https://github.com/panjf2000/ants)
+- [viper](https://github.com/spf13/viper)
+- [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core)
 
 ### 版本日志
 
@@ -21,6 +27,10 @@ git clone https://github.com/Cu1ii/JudgeHost.git
 ### 其他
 
 关于判题核心请移步 [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core)
+
+### Contributions
+
+欢迎大家提 Issue, PR
 
 ### *License*
 
