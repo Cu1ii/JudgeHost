@@ -48,7 +48,9 @@ func SetMaxWorkingAmount(context *gin.Context) {
 	}
 	if err := util.ValidateStructCheck(workingAmountDTO); err != nil {
 		logrus.Debug("ValidateStructCheck error", err)
-		context.JSON(500, gin.H{"msg": err})
+		context.JSON(http.StatusBadRequest, gin.H{"msg": err})
 	}
-	CommonService.SetJudgeHostWorkingAmount(workingAmountDTO.MaxWorkingAmount, workingAmountDTO.ForceSet)
+	if err := CommonService.SetJudgeHostWorkingAmount(workingAmountDTO.MaxWorkingAmount, workingAmountDTO.ForceSet); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+	}
 }

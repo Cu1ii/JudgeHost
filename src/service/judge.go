@@ -88,7 +88,7 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 }
 
 // RunJudge 执行判题
-func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResultDTO {
+func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) ([]*dto.SingleJudgeResultDTO, error) {
 	curId := atomic.AddInt64(&global.GlobalSubmissionId, 1)
 	judgeConfigurationBO := bo.JudgeConfigurationBO{
 		SubmissionId:   curId,
@@ -104,6 +104,7 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResult
 	compileResult, err := s.CompileSubmission()
 	if err != nil {
 		logrus.Debug("compile submission error", err.Error())
+		return nil, err
 	}
 	util.SetExtraInfo(compileResult)
 	result := []*dto.SingleJudgeResultDTO{}
@@ -116,7 +117,8 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResult
 		for index, solution := range totalSolutions {
 			singleJudgeResult, err := s.RunForSingleJudge(solution, index+1)
 			if err != nil {
-				break
+				result = append(result, singleJudgeResult)
+				return result, err
 			}
 			isAccept := singleJudgeResult.Condition == global.JudgeResult["ACCEPT"]
 			result = append(result, singleJudgeResult)
@@ -130,7 +132,7 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) []*dto.SingleJudgeResult
 		resolution.SetMessage()
 		result = append(result, &resolution)
 	}
-	return result
+	return result, nil
 }
 
 func (s *JudgeService) IsCompileSuccess(compileResult []string) bool {

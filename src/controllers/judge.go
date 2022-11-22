@@ -18,10 +18,11 @@ type JudgeTask struct {
 	JudgeDTO    *dto.JudgeDTO
 	JudgeResult []*dto.SingleJudgeResultDTO
 	Message     string
+	err         error
 }
 
 func (j *JudgeTask) Do() {
-	j.JudgeResult = JudgeService.RunJudge(j.JudgeDTO)
+	j.JudgeResult, j.err = JudgeService.RunJudge(j.JudgeDTO)
 	if len(j.JudgeResult) > 0 {
 		j.JudgeResult[0].SetMessage()
 		j.Message = j.JudgeResult[0].Message
@@ -54,5 +55,9 @@ func RunJudge(context *gin.Context) {
 	judgeTaskWrop := configuration.NewTaskWrop(&judgeTask, &wg)
 	configuration.JudgeExecutorPool.Invoke(judgeTaskWrop)
 	wg.Wait()
+	if judgeTask.err != nil {
+		context.JSON(http.StatusInternalServerError,
+			common.NewUnifiedResponseMessgaeData("judge result"+judgeTask.err.Error()+" ", judgeTask.JudgeResult))
+	}
 	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("judge result", judgeTask.JudgeResult))
 }

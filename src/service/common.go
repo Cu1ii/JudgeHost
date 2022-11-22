@@ -3,6 +3,7 @@ package service
 import (
 	"JudgeHost/src/config/configuration"
 	"JudgeHost/src/models/bo"
+	"errors"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"github.com/shirou/gopsutil/cpu"
@@ -76,12 +77,13 @@ func (c *CommonService) GetMemoryCostPercentage() int {
 	return int((1 - value) * 100)
 }
 
-func (c *CommonService) SetJudgeHostWorkingAmount(corePoolSize int, isForceSet bool) {
+func (c *CommonService) SetJudgeHostWorkingAmount(corePoolSize int, isForceSet bool) error {
 	isHavingWorkingNode := c.JudgeExecutorPool.Running() != 0
 	if !isForceSet && isHavingWorkingNode {
 		logrus.Debug("has task in working set fail")
-		return
+		return errors.New("has task in working set fail")
 	}
 	c.JudgeExecutorPool.Tune(corePoolSize)
 	fmt.Println(c.JudgeExecutorPool.Cap())
+	return nil
 }
