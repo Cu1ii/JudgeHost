@@ -1,4 +1,6 @@
-# JudgeHost 用户文档
+# JudgeHost
+
+[![](https://img.shields.io/badge/Version-v0.1-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
 
 这是 Online Judge 平台的**判题服务器模块**, 基于 YuJudge-Online-Judge JudgeHost的 Go 的重构版本, 在 Linux 下运行
 
@@ -12,17 +14,25 @@
 git clone https://github.com/Cu1ii/JudgeHost.git
 ```
 
+- 将 `src/scripts/` 下的 `compare.sh` 和 `compile.sh ` 移动到 `resource/config/judge-environment.yaml` 中配置的目录下
+
+- 启动后 执行
+
+  ```shell
+  curl "http://localhost:port/"
+  ```
+
+  检测是否成功
+
+- 测试判题可以使用该项目提供的 `/src/scripts/judge_test.sh` 来进行简单测试
+
 ### 使用了
 
-- [Gin](https://github.com/gin-gonic/gin)
-- [logrus](https://github.com/sirupsen/logrus)
-- [ants](https://github.com/panjf2000/ants)
-- [viper](https://github.com/spf13/viper)
-- [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core)
+[![](https://img.shields.io/badge/gin-v1.8.1-%235698c3)](https://github.com/gin-gonic/gin) [![](https://img.shields.io/badge/logrus-v1.9.0-%23428675)](https://github.com/sirupsen/logrus) [![](https://img.shields.io/badge/ants-v2.6.0-%2315231b)](https://github.com/panjf2000/ants) [![](https://img.shields.io/badge/viper-%20v1.14.0-%23e2d849) ](https://github.com/spf13/viper)  [![](https://img.shields.io/badge/YuJudge--Core-%20-%23e2d849)](https://github.com/yuzhanglong/YuJudge-Core)
 
 ### 版本日志
 
-最新版本 `0.1`
+最新版本 `v0.1`
 
 ### 其他
 
@@ -57,4 +67,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
