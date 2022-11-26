@@ -2,36 +2,24 @@ package configuration
 
 import (
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"sync"
 	"sync/atomic"
 )
 
 type Task interface {
 	Do()
+	GetName() string
+	Wait()
 }
 
-var JudgeIndexId int64 = 1
+var JudgeIndexId atomic.Int64
 var JudgeNamePrefix string
 
 func SetJudgeNamePrefix(name string) {
 	JudgeNamePrefix = "From JudgeThreadFactory's " + name + "-Worker-"
 }
 
-type TaskWrop struct {
-	Task Task
-	Name string
-	Wg   *sync.WaitGroup
-}
-
-func NewTaskWrop(task Task, wg *sync.WaitGroup) *TaskWrop {
-	name := JudgeNamePrefix + strconv.FormatInt(atomic.AddInt64(&JudgeIndexId, 1), 10)
-	return &TaskWrop{Task: task, Name: name, Wg: wg}
-}
-
 func TaskFunc(data interface{}) {
-	taskWrop := data.(*TaskWrop)
-	taskWrop.Task.Do()
-	logrus.Info("taskWrop.Name: ", taskWrop.Name)
-	taskWrop.Wg.Done()
+	task := data.(Task)
+	logrus.Info("task.Name: ", task.GetName)
+	task.Do()
 }

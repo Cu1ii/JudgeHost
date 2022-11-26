@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"go.uber.org/atomic"
 	"strings"
 )
 
 // 全局配置
 
-var GlobalSubmissionId int64
+var GlobalSubmissionId atomic.Int64
 
 var JudgeConfigDefault = map[string]int{
 	// cpu时间限制 4000ms

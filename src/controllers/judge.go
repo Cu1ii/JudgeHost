@@ -9,26 +9,45 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"sync"
+	"strconv"
 )
 
-var JudgeService *service.JudgeService = service.NewJudgeService(configuration.JudgeEnvironmentConfigurationEntity)
-
 type JudgeTask struct {
+	Name        string
 	JudgeDTO    *dto.JudgeDTO
 	JudgeResult []*dto.SingleJudgeResultDTO
 	Message     string
-	err         error
+	Err         error
+	done        chan int
+}
+
+func NewJudgeTask(judgeDTO *dto.JudgeDTO) *JudgeTask {
+	return &JudgeTask{
+		Name:        configuration.JudgeNamePrefix + strconv.FormatInt(configuration.JudgeIndexId.Add(1), 10),
+		JudgeDTO:    judgeDTO,
+		done:        make(chan int),
+		JudgeResult: make([]*dto.SingleJudgeResultDTO, 1),
+	}
 }
 
 func (j *JudgeTask) Do() {
-	j.JudgeResult, j.err = JudgeService.RunJudge(j.JudgeDTO)
+	j.JudgeResult, j.Err = JudgeService.RunJudge(j.JudgeDTO)
 	if len(j.JudgeResult) > 0 {
 		j.JudgeResult[0].SetMessage()
 		j.Message = j.JudgeResult[0].Message
 	}
-
+	j.done <- 1
 }
+
+func (j *JudgeTask) GetName() string {
+	return j.Name
+}
+
+func (j *JudgeTask) Wait() {
+	_ = <-j.done
+}
+
+var JudgeService = service.NewJudgeService(configuration.JudgeEnvironmentConfigurationEntity)
 
 func LoadJudgeControllers(e *gin.Engine) {
 	judgeGroup := e.Group("/judge")
@@ -46,18 +65,12 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
-	judgeTask := JudgeTask{
-		JudgeDTO: &judgeDTO,
-	}
-	judgeTask.JudgeResult = make([]*dto.SingleJudgeResultDTO, 1)
-	var wg sync.WaitGroup
-	wg.Add(1)
-	judgeTaskWrop := configuration.NewTaskWrop(&judgeTask, &wg)
-	configuration.JudgeExecutorPool.Invoke(judgeTaskWrop)
-	wg.Wait()
-	if judgeTask.err != nil {
+	judgeTask := NewJudgeTask(&judgeDTO)
+	configuration.JudgeExecutorPool.Invoke(judgeTask)
+	judgeTask.Wait()
+	if judgeTask.Err != nil {
 		context.JSON(http.StatusInternalServerError,
-			common.NewUnifiedResponseMessgaeData("judge result"+judgeTask.err.Error()+" ", judgeTask.JudgeResult))
+			common.NewUnifiedResponseMessgaeData("judge result"+judgeTask.Err.Error()+" ", judgeTask.JudgeResult))
 	}
 	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("judge result", judgeTask.JudgeResult))
 }

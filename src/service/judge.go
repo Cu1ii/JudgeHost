@@ -14,7 +14,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync/atomic"
 )
 
 type JudgeService struct {
@@ -89,7 +88,7 @@ func (s *JudgeService) CompileSubmission() ([]string, error) {
 
 // RunJudge 执行判题
 func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) ([]*dto.SingleJudgeResultDTO, error) {
-	curId := atomic.AddInt64(&global.GlobalSubmissionId, 1)
+	curId := global.GlobalSubmissionId.Add(1)
 	judgeConfigurationBO := bo.JudgeConfigurationBO{
 		SubmissionId:   curId,
 		JudgeConfig:    judgeDTO,
@@ -243,7 +242,7 @@ func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeRes
 	if isCppFamily {
 		isGuard = s.EnableJudgeCoreGuard
 	}
-	rootCommand := exec.Command("echo", "your root password")
+	rootCommand := exec.Command("echo", "370802wsl")
 	judgeCommand := exec.Command("sudo", "-S", coreScript,
 		"-r", util.GetRunnerScriptPath(),
 		"-o", workingPath+"/"+name+".out",

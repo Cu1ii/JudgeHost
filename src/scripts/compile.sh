@@ -25,4 +25,4 @@ touch run;
 
 chmod 777 ./run;
 
-echo "your root password" | sudo -S $JUDGE_CORE_PATH -t 4000 -c 4000 -m 100000 -f "$COMPILE_INFO_OUT_MAX_SIZE" -u "$USER_ID" -r "$BUILDING_SCRIPT_PATH" -o compile.out -e compile.err
+echo "370802wsl" | sudo -S $JUDGE_CORE_PATH -t 4000 -c 4000 -m 100000 -f "$COMPILE_INFO_OUT_MAX_SIZE" -u "$USER_ID" -r "$BUILDING_SCRIPT_PATH" -o compile.out -e compile.err

@@ -1,7 +1,7 @@
 package bo
 
 import (
-	"JudgeHost/src/config/global"
+	global "JudgeHost/src/config/global"
 	"JudgeHost/src/models/dto"
 )
 
@@ -19,9 +19,9 @@ type JudgeConfigurationBO struct {
 
 func NewJudgeConfigurationBO(judgeConfig *dto.JudgeDTO,
 	workPath, srciptPath, resolutionPath string) *JudgeConfigurationBO {
-	global.GlobalSubmissionId++
+	global.GlobalSubmissionId.Add(1)
 	return &JudgeConfigurationBO{
-		SubmissionId:   global.GlobalSubmissionId,
+		SubmissionId:   global.GlobalSubmissionId.Load(),
 		JudgeConfig:    judgeConfig,
 		WorkPath:       workPath,
 		ScriptPath:     srciptPath,
