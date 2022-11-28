@@ -12,6 +12,11 @@ import (
 	"strconv"
 )
 
+func LoadJudgeControllers(e *gin.Engine) {
+	judgeGroup := e.Group("/judge")
+	judgeGroup.POST("/result", RunJudge)
+}
+
 type JudgeTask struct {
 	Name        string
 	JudgeDTO    *dto.JudgeDTO
@@ -23,10 +28,9 @@ type JudgeTask struct {
 
 func NewJudgeTask(judgeDTO *dto.JudgeDTO) *JudgeTask {
 	return &JudgeTask{
-		Name:        configuration.JudgeNamePrefix + strconv.FormatInt(configuration.JudgeIndexId.Add(1), 10),
-		JudgeDTO:    judgeDTO,
-		done:        make(chan int),
-		JudgeResult: make([]*dto.SingleJudgeResultDTO, 1),
+		Name:     configuration.JudgeNamePrefix + strconv.FormatInt(configuration.JudgeIndexId.Add(1), 10),
+		JudgeDTO: judgeDTO,
+		done:     make(chan int),
 	}
 }
 
@@ -49,11 +53,6 @@ func (j *JudgeTask) Wait() {
 
 var JudgeService = service.NewJudgeService(configuration.JudgeEnvironmentConfigurationEntity)
 
-func LoadJudgeControllers(e *gin.Engine) {
-	judgeGroup := e.Group("/judge")
-	judgeGroup.POST("/result", RunJudge)
-}
-
 func RunJudge(context *gin.Context) {
 	judgeDTO := dto.JudgeDTO{}
 	if err := context.ShouldBind(&judgeDTO); err != nil {
@@ -69,6 +68,7 @@ func RunJudge(context *gin.Context) {
 	configuration.JudgeExecutorPool.Invoke(judgeTask)
 	judgeTask.Wait()
 	if judgeTask.Err != nil {
+		logrus.Debug("ValidateStructCheck error", judgeTask.Err)
 		context.JSON(http.StatusInternalServerError,
 			common.NewUnifiedResponseMessgaeData("judge result"+judgeTask.Err.Error()+" ", judgeTask.JudgeResult))
 	}

@@ -15,6 +15,8 @@ const (
 	CompileStdOutName   = "compile.out"
 	CompileStdErrName   = "compile.err"
 	RunnerScriptName    = "run"
+	SpjScriptName       = "spj.sh"
+	CheckerName         = "checker"
 )
 
 var JudgeHolderThreadLocal = routine.NewThreadLocal()
@@ -41,6 +43,10 @@ func GetJudgeCoreScriptPath() string {
 
 func GetCompareScriptPath() string {
 	return GetJudgeConfiguration().ScriptPath + "/" + CompareScriptName
+}
+
+func GetSpjScriptPath() string {
+	return GetJudgeConfiguration().ScriptPath + "/" + SpjScriptName
 }
 
 func GetRunnerScriptPath() string {

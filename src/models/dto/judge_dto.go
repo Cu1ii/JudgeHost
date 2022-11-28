@@ -8,6 +8,7 @@ type JudgeDTO struct {
 	OutputLimit     int            `form:"outputLimit" validate:"gte=10" json:"output_limit,omitempty"`             // 输出最小限制为 10Byte
 	Language        string         `form:"language" validate:"required" json:"language,omitempty"`                  // 语言不得为空
 	JudgePreference string         `json:"judge_preference,omitempty"`
+	Spj             bool           `json:"spj"`
 	Solutions       []*SolutionDTO `mapstructure:"solutions" form:"solutions" validate:"lte=10,gte=0" json:"solutions,omitempty"` // 期望输入, 输出长度最小为 1 最大为 10
 }
 
@@ -16,4 +17,8 @@ func (p *JudgeDTO) IsAcmMode() bool {
 		return true
 	}
 	return false
+}
+
+func (p *JudgeDTO) IsSpj() bool {
+	return p.Spj
 }

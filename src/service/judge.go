@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
@@ -114,7 +115,7 @@ func (s *JudgeService) RunJudge(judgeDTO *dto.JudgeDTO) ([]*dto.SingleJudgeResul
 		// totalSolutions = append(judgeDTO.Solutions, &dto.SolutionDTO{})
 
 		for index, solution := range totalSolutions {
-			singleJudgeResult, err := s.RunForSingleJudge(solution, index+1)
+			singleJudgeResult, err := s.RunForSingleJudge(solution, index+1, judgeDTO.IsSpj())
 			if err != nil {
 				result = append(result, singleJudgeResult)
 				return result, err
@@ -157,7 +158,7 @@ func (s *JudgeService) ReadFile(filePath string) ([]string, error) {
 	return util.ReadFileByLines(filePath)
 }
 
-func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int) (*dto.SingleJudgeResultDTO, error) {
+func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int, isSpj bool) (*dto.SingleJudgeResultDTO, error) {
 	singleJudgeRunningName := "running_" + strconv.FormatInt(int64(index), 10)
 	input, output := s.GetResolutionInputAndOutputFile(solutionDTO)
 	judging, err := s.StartJudging(input, singleJudgeRunningName)
@@ -181,21 +182,24 @@ func (s *JudgeService) RunForSingleJudge(solutionDTO *dto.SolutionDTO, index int
 		isSuccess := judging.Condition == 1
 		// [DEBUG]:  TEST
 		// output = "/home/cu1/test/submission/exp.out"
-		isPass, err := s.CompareOutputWithResolutions(judging.StdOutPath, output)
+		isPass, err := s.CompareOutputWithResolutions(judging.StdInPath, judging.StdOutPath, output, isSpj)
 
 		// DEBUG
-		if !isPass {
-			judging.Condition = global.JudgeResult["WRONG_ANSWER"]
-		}
+		//if !isPass {
+		//	judging.Condition = global.JudgeResult["WRONG_ANSWER"]
+		//}
 
 		//logrus.Info("is pass ? ", isPass, "stdout:",
 		// judging.StdOutPath, " output: ", output)
 		if err != nil {
 			logrus.Debug("CompareOutputWithResolutions error: ", err)
+			judging.Condition = global.JudgeResult["RUNTIME_ERROR"]
 			return nil, err
 		}
 		if isSuccess && isPass {
 			judging.Condition = global.JudgeResult["ACCEPT"]
+		} else if isSuccess {
+			judging.Condition = global.JudgeResult["WRONG_ANSWER"]
 		}
 	} else {
 		util.SetExtraInfo(judgeCoreStdErr)
@@ -211,23 +215,39 @@ func (s *JudgeService) GetResolutionInputAndOutputFile(solution *dto.SolutionDTO
 	// TODO 利用 redis 做本地缓存 文件在远程存储时选择实现
 }
 
-func (s *JudgeService) CompareOutputWithResolutions(submissionOutput, expectedOutput string) (bool, error) {
-	compareScript := util.GetCompareScriptPath()
+func (s *JudgeService) CompareOutputWithResolutions(stdInput, submissionOutput, expectedOutput string, isSpj bool) (bool, error) {
+	if isSpj {
+		compareScript := util.GetSpjScriptPath()
+		checkerPath := expectedOutput[:strings.LastIndex(stdInput, "/")] + "/checker"
+		fmt.Println(checkerPath, stdInput, submissionOutput, expectedOutput)
+		compareCommand := exec.Command(compareScript, checkerPath, stdInput, submissionOutput, expectedOutput)
+		var exitOut bytes.Buffer
+		compareCommand.Stdout = &exitOut
+		if err := compareCommand.Run(); err != nil {
+			logrus.Debug("compareCommand.Wait error: ", err)
+			return false, err
+		}
+		exitMsg := exitOut.String()
+		fmt.Println("[DEBUG] service/judge.go 231: exitMsg", exitMsg)
+		return strings.Contains(exitMsg, "0"), nil
 
+	} else {
+		compareScript := util.GetCompareScriptPath()
+		compareCommand := exec.Command(compareScript, submissionOutput, expectedOutput)
+		var exitOut bytes.Buffer
+		compareCommand.Stdout = &exitOut
+		if err := compareCommand.Run(); err != nil {
+			logrus.Debug("compareCommand.Wait error: ", err)
+			return false, err
+		}
+		exitCode := exitOut.String()
+		// fmt.Println("[DEBUG] service/judge.go:257 ", "0" == exitCode)
+		fmt.Println("[DEBUG] service/judge.go:258 ", exitCode)
+		return strings.Contains(exitCode, "0"), nil
+	}
 	// [DEBUG]: TEST
 	// fmt.Println("[DEBUG] service/judge.go:247 ", compareScript)
 
-	compareCommand := exec.Command(compareScript, submissionOutput, expectedOutput)
-	var exitOut bytes.Buffer
-	compareCommand.Stdout = &exitOut
-	if err := compareCommand.Run(); err != nil {
-		logrus.Debug("compareCommand.Wait error: ", err)
-		return false, err
-	}
-	exitCode := exitOut.String()
-	// fmt.Println("[DEBUG] service/judge.go:257 ", "0" == exitCode)
-	// fmt.Println("[DEBUG] service/judge.go:258 ", exitCode)
-	return strings.Contains(exitCode, "0"), nil
 }
 
 func (s *JudgeService) StartJudging(stdInPath, name string) (*dto.SingleJudgeResultDTO, error) {

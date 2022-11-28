@@ -38,6 +38,10 @@ git clone https://github.com/Cu1ii/JudgeHost.git
 
 关于判题核心请移步 [Yu-Judge-Core](https://github.com/yuzhanglong/YuJudge-Core)
 
+
+### 待实现
+- [x] 实现 SPJ
+
 ### Contributions
 
 欢迎大家提 Issue, PR
