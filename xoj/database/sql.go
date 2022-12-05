@@ -39,8 +39,8 @@ func GetProblemDataById(pk string) *dao.ProblemData {
 
 func UpdateProblemData(pk string, result string) bool {
 	mySQLDB := GetMySQLDB()
-	if res := mySQLDB.Raw("UPDATE problem_problemdata SET submission = submission + 1 "+
-		result+" = "+result+" + 1"+"WHERE problem = ? ESCAPE '#'", pk); res.Error != nil {
+	if res := mySQLDB.Exec("UPDATE problem_problemdata SET submission = submission + 1, "+
+		result+" = "+result+" + 1"+" WHERE problem = ?", pk); res.Error != nil {
 		logrus.Error("update problem data error ", res.Error)
 		return false
 	}

@@ -27,3 +27,8 @@ func TestCreateCaseStatus(t *testing.T) {
 	caseStatus := AddCaseStatus(&dao.CaseStatus{})
 	fmt.Println("insert result = ", caseStatus)
 }
+
+func TestUpdateProblemData(t *testing.T) {
+	res := UpdateProblemData("1", "ac")
+	fmt.Println(res)
+}
