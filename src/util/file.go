@@ -94,7 +94,7 @@ func DeleteFile(filePath string, deleteSelf bool) (bool, error) {
 }
 
 func WriteDataToFilePath(data, filePath string) (bool, error) {
-	targetFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	targetFile, err := os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return false, err
 	}

@@ -1,4 +1,4 @@
-package configuration
+package pool
 
 import (
 	"github.com/panjf2000/ants/v2"
@@ -29,17 +29,24 @@ const (
 	NONBLOCKING        = true
 )
 
-var JudgeExecutorPool = (*ants.PoolWithFunc)(nil)
+var JudgePool = (*ants.Pool)(nil)
 
-func init() {
-	var err error
-	JudgeExecutorPool, err = ants.NewPoolWithFunc(CORE_POOL_SIZE, TaskFunc, ants.WithOptions(ants.Options{
+func NewJudgePool() *ants.Pool {
+	judgePool, err := ants.NewPool(CORE_POOL_SIZE, ants.WithOptions(ants.Options{
 		ExpiryDuration:   EXPIRY_DURATION,
 		PreAlloc:         PRE_ALLOC,
 		MaxBlockingTasks: MAX_BLOCKING_TASKS,
 		Nonblocking:      NONBLOCKING,
 	}))
 	if err != nil {
-		logrus.Error("judgeExecutorPool init fail: ", err.Error())
+		logrus.Error("new judge pool fail: ", err.Error())
 	}
+	return judgePool
+}
+
+func GetJudgePool() *ants.Pool {
+	if JudgePool == nil {
+		JudgePool = NewJudgePool()
+	}
+	return JudgePool
 }

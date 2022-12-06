@@ -17,6 +17,24 @@ func GetJudgeStatus() []*dao.JudgeStatus {
 	return judgeArry
 }
 
+func UpdateJudgeStatusResult(id int, result int) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE judge_backend.judgestatus_judgestatus SET result = ? WHERE id = ?", result, id); res.Error != nil {
+		logrus.Error("update judge status error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateJudgeStatusMessage(id int, msg string) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE judge_backend.judgestatus_judgestatus SET message = ? WHERE id = ?", msg, id); res.Error != nil {
+		logrus.Error("update judge status error ", res.Error)
+		return false
+	}
+	return true
+}
+
 func GetProblemById(pk string) *dao.Problem {
 	mySQLDB := GetMySQLDB()
 	problem := dao.Problem{}

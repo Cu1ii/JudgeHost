@@ -32,3 +32,13 @@ func TestUpdateProblemData(t *testing.T) {
 	res := UpdateProblemData("1", "ac")
 	fmt.Println(res)
 }
+
+func TestUpdateJudgeStatusResult(t *testing.T) {
+	res := UpdateJudgeStatusResult(1, 0)
+	fmt.Println(res)
+}
+
+func TestUpdateJudgeStatusMessage(t *testing.T) {
+	res := UpdateJudgeStatusMessage(1, "111")
+	fmt.Println(res)
+}
