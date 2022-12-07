@@ -10,6 +10,26 @@ import (
 	"strings"
 )
 
+func compile(id int, code, submissionPath, problem, language string) bool {
+	switch language {
+	case "C":
+		return compileC(id, code, submissionPath, problem)
+	case "C++":
+		return compileCPP(id, code, submissionPath, problem)
+	case "Python3":
+		return compilePython3(id, code, submissionPath, problem)
+	case "Python2":
+		return compilePython2(id, code, submissionPath, problem)
+	case "Go":
+		return compileGo(id, code, submissionPath, problem)
+	case "Swift5.1":
+		return compileSwift(id, code, submissionPath, problem)
+	default:
+		compileError(id, problem, "Unknown Language!")
+		return false
+	}
+}
+
 func compileC(id int, code, submissionPath, problem string) bool {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
@@ -211,10 +231,6 @@ func compileSwift(id int, code, submissionPath, problem string) bool {
 		return false
 	}
 	return true
-}
-
-func compileError(id int, problem, msg string) {
-	fmt.Println(id, " ", problem, " ", msg)
 }
 
 func pythonFilters(code string) string {

@@ -45,6 +45,16 @@ func GetProblemById(pk string) *dao.Problem {
 	return &problem
 }
 
+func GetProblemTimeMemory(pk string) (int, int) {
+	problem := GetProblemById(pk)
+	return problem.Time, problem.Memory
+}
+
+func GetProblemScore(pk string) int {
+	problemData := GetProblemDataById(pk)
+	return problemData.Score
+}
+
 func GetProblemDataById(pk string) *dao.ProblemData {
 	mySQLDB := GetMySQLDB()
 	problemData := dao.ProblemData{}
