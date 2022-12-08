@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"log"
 	"os"
@@ -72,6 +73,22 @@ func ReadFileByLines(filePath string) ([]string, error) {
 		stringList = append(stringList, string(line))
 	}
 	return stringList, nil
+}
+
+// ReadFileByLines 讲目标文件中的数据按行读取
+func ReadFileByByte(filePath string, byteNumber int) (string, error) {
+	file, err := os.Open(filePath)
+	defer file.Close()
+	if err != nil {
+		return "", err
+	}
+	buffer := make([]byte, byteNumber)
+
+	if _, err := file.Read(buffer); err != io.EOF {
+		logrus.Errorf("read %s error %v", filePath, err)
+		return "", err
+	}
+	return string(buffer), err
 }
 
 // DeleteFile 根据 deleteSelf 来判断是否删除自身, 如果是文件夹则判断是清空文件夹还是连带文件夹一起删除

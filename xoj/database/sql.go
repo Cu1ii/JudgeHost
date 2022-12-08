@@ -2,10 +2,13 @@ package database
 
 import (
 	"JudgeHost/xoj/dao"
+	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
 const pending = -1
+
+//---------------------------------JudgeStatus-----------------------------------------//
 
 func GetJudgeStatus() []*dao.JudgeStatus {
 	mySQLDB := GetMySQLDB()
@@ -35,6 +38,8 @@ func UpdateJudgeStatusMessage(id int, msg string) bool {
 	return true
 }
 
+//---------------------------------Problem-----------------------------------------//
+
 func GetProblemById(pk string) *dao.Problem {
 	mySQLDB := GetMySQLDB()
 	problem := dao.Problem{}
@@ -43,6 +48,30 @@ func GetProblemById(pk string) *dao.Problem {
 		return nil
 	}
 	return &problem
+}
+
+func GetIsHaveDoneProblem(username, problem string) bool {
+	mySQLDB := GetMySQLDB()
+	selectProblem := fmt.Sprintf("SELECT * FROM judgestatus_judgestatus WHERE user = '%s'  AND problem = '%s' AND result = 0", username, problem)
+	problems := []dao.Problem{}
+	if res := mySQLDB.Raw(selectProblem).Scan(&problems); res.Error != nil {
+		logrus.Error("select problem error ", res.Error)
+		return false
+	}
+	if len(problems) > 0 {
+		return true
+	}
+	return false
+}
+
+func AddProSubmitNum(problem string) bool {
+	mySQLDB := GetMySQLDB()
+	addProSubmitNum := fmt.Sprintf("UPDATE problem_problemdata SET submission = submission+1 WHERE problem = '%s'", problem)
+	if res := mySQLDB.Exec(addProSubmitNum); res.Error != nil {
+		logrus.Error("add problem data ( submission = submission + 1 ) error ", res.Error)
+		return false
+	}
+	return true
 }
 
 func GetProblemTimeMemory(pk string) (int, int) {
@@ -54,6 +83,8 @@ func GetProblemScore(pk string) int {
 	problemData := GetProblemDataById(pk)
 	return problemData.Score
 }
+
+//---------------------------------ProblemData-----------------------------------------//
 
 func GetProblemDataById(pk string) *dao.ProblemData {
 	mySQLDB := GetMySQLDB()
@@ -75,6 +106,8 @@ func UpdateProblemData(pk string, result string) bool {
 	return true
 }
 
+//---------------------------------CaseStatus-----------------------------------------//
+
 func AddCaseStatus(status *dao.CaseStatus) bool {
 	mySQLDB := GetMySQLDB()
 	if create := mySQLDB.Exec("INSERT INTO judgestatus_casestatus "+
@@ -83,6 +116,18 @@ func AddCaseStatus(status *dao.CaseStatus) bool {
 		status.StatusId, status.Username, status.Problem, status.Result,
 		status.Time, status.Memory, status.TestCase, status.CaseData, status.OutputData, status.UserOutput); create.Error != nil {
 		logrus.Error("insert case_status error ", create.Error)
+		return false
+	}
+	return true
+}
+
+//---------------------------------ContestBoard-----------------------------------------//
+
+func SetBoard(id, statue int) bool {
+	mySQLDB := GetMySQLDB()
+	updateBoardType := fmt.Sprintf("UPDATE contest_contestboard SET type = %d WHERE submitid = %d", statue, id)
+	if res := mySQLDB.Exec(updateBoardType); res.Error != nil {
+		logrus.Error("update board type error ", res.Error)
 		return false
 	}
 	return true
