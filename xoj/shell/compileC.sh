@@ -9,4 +9,4 @@ rm -rf "$ID".out "$ID"ce.txt
 
 set -e
 
-timeout 10 gcc Main.c -fmax-errors=3 -o "$ID".out -O2 -std=c11 2>"$ID"ce.txt
+timeout 10 gcc Main.c -fmax-errors=3 -o "$ID".o -O2 -std=c11 2>"$ID"ce.txt

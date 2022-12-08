@@ -3,6 +3,8 @@ package judger
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os/exec"
 	"strings"
 )
 
@@ -71,4 +73,21 @@ func Run(max_cpu_time,
 		return nil, err
 	}
 	return &result, nil
+}
+
+func ExecShell(s_cmd string) ([]byte, error) {
+
+	cmd := exec.Command("/bin/bash", "-c", s_cmd)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd.Start()
+
+	data, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

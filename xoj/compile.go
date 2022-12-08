@@ -16,6 +16,8 @@ func compile(id int, code, submissionPath, problem, language string) bool {
 		return compileC(id, code, submissionPath, problem)
 	case "C++":
 		return compileCPP(id, code, submissionPath, problem)
+	case "Java":
+		return compileJava(id, code, submissionPath, problem)
 	case "Python3":
 		return compilePython3(id, code, submissionPath, problem)
 	case "Python2":
