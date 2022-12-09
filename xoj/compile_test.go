@@ -6,7 +6,7 @@ import (
 )
 
 func TestCompileCPP(t *testing.T) {
-	code := "#include <ostrea>\n\nint main()\n{\n  std::cout << \"hello world\" << std::endl;\n  return 0;\n}"
+	code := "#include <iostream>\n\nint main()\n{\n  std::cout << \"hello world\" << std::endl;\n  return 0;\n}"
 	fmt.Println(compileCPP(1, code, "/home/cu1/XOJ/submission", "1"))
 }
 
@@ -16,12 +16,12 @@ func TestCompileC(t *testing.T) {
 }
 
 func TestCompilePython2(t *testing.T) {
-	code := "print(\"1\")"
-	fmt.Println(compilePython2(4, code, "/home/cu1/XOJ/submission", "3"))
+	code := "print(\"hello world\")"
+	fmt.Println(compilePython2(3, code, "/home/cu1/XOJ/submission", "3"))
 }
 
 func TestCompilePython3(t *testing.T) {
-	code := "print(\"4\")"
+	code := "print(\"hello world\")"
 	fmt.Println(compilePython3(4, code, "/home/cu1/XOJ/submission", "4"))
 }
 
@@ -31,6 +31,6 @@ func TestCompileGo(t *testing.T) {
 }
 
 func TestCompileJava(t *testing.T) {
-	code := "import java.util.*;\npublic class Main{\n\tpublic static void main(String args[]){\n\t\tScanner cin = new Scanner(System.in);\n\t\tint a, b;\n\t\twhile (cin.hasNext()){\n\t\t\ta = cin.nextInt(); b = cin.nextInt();\n\t\t\tSystem.out.println(a + b);\n\t\t}\n\t}\n}"
+	code := "import java.util.*;\npublic class Main{\n\tpublic static void main(String args[]){\n\t\tScanner cin = new Scanner(System.in);\n\t\tint a, b;\n\t\t\n\t\t\tSystem.out.println(\"hello world\");\n\t\t\n\t}\n}"
 	fmt.Println(compileJava(6, code, "/home/cu1/XOJ/submission", "6"))
 }

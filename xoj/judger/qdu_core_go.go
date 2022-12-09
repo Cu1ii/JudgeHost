@@ -36,9 +36,14 @@ func Run(max_cpu_time,
 	log_path,
 	seccomp_rule_name string) (*Result, error) {
 
-	proc_args := []string{"echo 370802wsl | sudo /usr/lib/judger/libjudger.so"}
+	proc_args := []string{"echo \"370802wsl\" | sudo -S /usr/lib/judger/libjudger.so"}
 
-	proc_args = append(proc_args, args...)
+	//proc_args = append(proc_args, args...)
+	if len(args) > 0 {
+		for _, arg := range args {
+			proc_args = append(proc_args, "--args="+arg)
+		}
+	}
 	proc_args = append(proc_args, env...)
 	proc_args = append(proc_args, fmt.Sprintf("--max_cpu_time=%d", max_cpu_time))
 	proc_args = append(proc_args, fmt.Sprintf("--max_real_time=%d", max_real_time))
