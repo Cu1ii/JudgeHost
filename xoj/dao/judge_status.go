@@ -15,7 +15,7 @@ type JudgeStatus struct {
 	SubmitTime     time.Time
 	Judger         string
 	Contest        int64
-	ContestProblem int64
+	ContestProblem int
 	Code           string
 	TestCase       string
 	Message        string

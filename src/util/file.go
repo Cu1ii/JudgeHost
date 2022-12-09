@@ -76,17 +76,27 @@ func ReadFileByLines(filePath string) ([]string, error) {
 }
 
 // ReadFileByLines 讲目标文件中的数据按行读取
-func ReadFileByByte(filePath string, byteNumber int) (string, error) {
+func ReadFileByByte(filePath string, byteNumber int64) (string, error) {
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
 		return "", err
 	}
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return "", err
+	}
+	if fileInfo.Size() <= byteNumber {
+		byteNumber = fileInfo.Size()
+	}
 	buffer := make([]byte, byteNumber)
 
-	if _, err := file.Read(buffer); err != io.EOF {
+	if _, err := file.Read(buffer); err != nil && err != io.EOF {
 		logrus.Errorf("read %s error %v", filePath, err)
 		return "", err
+	}
+	if byteNumber > 300 {
+		return string(buffer) + "......", err
 	}
 	return string(buffer), err
 }

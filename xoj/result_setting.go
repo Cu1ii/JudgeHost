@@ -13,9 +13,10 @@ func doneProblem(id int, problem, message string, memory, mytime int, username s
 }
 
 func acProblem(id int, problem, message string, memory, time int, username string, proScore int, isAc bool, contest int) {
-
+	fmt.Println(message)
 }
 
 func doneCase(statusId int, username, problem, result string,
 	time, memory int, testcase, caseData, outputData, userOutput string) {
+
 }

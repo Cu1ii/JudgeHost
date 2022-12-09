@@ -20,6 +20,16 @@ func GetJudgeStatus() []*dao.JudgeStatus {
 	return judgeArry
 }
 
+func GetJudgeStatusById(id int64) *dao.JudgeStatus {
+	mySQLDB := GetMySQLDB()
+	status := dao.JudgeStatus{}
+	if res := mySQLDB.Raw("SELECT * FROM judgestatus_judgestatus where id = ?", id).Scan(&status); res.Error != nil {
+		logrus.Error("select judge status error ", res.Error)
+		return nil
+	}
+	return &status
+}
+
 func UpdateJudgeStatusResult(id int, result int) bool {
 	mySQLDB := GetMySQLDB()
 	if res := mySQLDB.Exec("UPDATE judge_backend.judgestatus_judgestatus SET result = ? WHERE id = ?", result, id); res.Error != nil {
@@ -123,7 +133,7 @@ func AddCaseStatus(status *dao.CaseStatus) bool {
 
 //---------------------------------ContestBoard-----------------------------------------//
 
-func SetBoard(id, statue int) bool {
+func SetBoard(id int64, statue int) bool {
 	mySQLDB := GetMySQLDB()
 	updateBoardType := fmt.Sprintf("UPDATE contest_contestboard SET type = %d WHERE submitid = %d", statue, id)
 	if res := mySQLDB.Exec(updateBoardType); res.Error != nil {
