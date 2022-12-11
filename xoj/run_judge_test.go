@@ -7,6 +7,10 @@ import (
 )
 
 func TestRunJudge(t *testing.T) {
+	RunJudge()
+}
+
+func TestJudge(t *testing.T) {
 	status := database.GetJudgeStatusById(1)
 	judge(
 		int(status.Id),

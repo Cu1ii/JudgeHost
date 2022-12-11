@@ -1,19 +1,18 @@
 package database
 
 import (
+	"JudgeHost/xoj/constent"
 	"JudgeHost/xoj/dao"
 	"fmt"
 	"github.com/sirupsen/logrus"
 )
-
-const pending = -1
 
 //---------------------------------JudgeStatus-----------------------------------------//
 
 func GetJudgeStatus() []*dao.JudgeStatus {
 	mySQLDB := GetMySQLDB()
 	judgeArry := []*dao.JudgeStatus{}
-	if res := mySQLDB.Raw("SELECT * FROM judgestatus_judgestatus where result = ?", pending).Scan(&judgeArry); res.Error != nil {
+	if res := mySQLDB.Raw("SELECT * FROM judgestatus_judgestatus where result = ?", constent.PENDING).Scan(&judgeArry); res.Error != nil {
 		logrus.Error("select judge status error ", res.Error)
 		return nil
 	}
@@ -42,6 +41,15 @@ func UpdateJudgeStatusResult(id int, result int) bool {
 func UpdateJudgeStatusMessage(id int, msg string) bool {
 	mySQLDB := GetMySQLDB()
 	if res := mySQLDB.Exec("UPDATE judge_backend.judgestatus_judgestatus SET message = ? WHERE id = ?", msg, id); res.Error != nil {
+		logrus.Error("update judge status error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateJudgeStatus(id int, memory, mytime int, result int, testcase string) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE judgestatus_judgestatus SET memory = ?, time= ?, result = ?, testcase=?  WHERE id = ?", memory, mytime, result, testcase, id); res.Error != nil {
 		logrus.Error("update judge status error ", res.Error)
 		return false
 	}
@@ -94,8 +102,6 @@ func GetProblemScore(pk string) int {
 	return problemData.Score
 }
 
-//---------------------------------ProblemData-----------------------------------------//
-
 func GetProblemDataById(pk string) *dao.ProblemData {
 	mySQLDB := GetMySQLDB()
 	problemData := dao.ProblemData{}
@@ -110,7 +116,25 @@ func UpdateProblemData(pk string, result string) bool {
 	mySQLDB := GetMySQLDB()
 	if res := mySQLDB.Exec("UPDATE problem_problemdata SET submission = submission + 1, "+
 		result+" = "+result+" + 1"+" WHERE problem = ?", pk); res.Error != nil {
-		logrus.Error("update problem data error ", res.Error)
+		logrus.Error("update problem data submission error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateProblemAuth(pk string, auth int) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE  problem_problem SET auth = ? WHERE problem = ?", auth, pk); res.Error != nil {
+		logrus.Error("update problem data auth error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateProblemDataAuth(pk string, auth int) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE  problem_problemdata SET auth = ? WHERE problem = ?", auth, pk); res.Error != nil {
+		logrus.Error("update problem data auth error ", res.Error)
 		return false
 	}
 	return true
@@ -131,13 +155,88 @@ func AddCaseStatus(status *dao.CaseStatus) bool {
 	return true
 }
 
-//---------------------------------ContestBoard-----------------------------------------//
+//---------------------------------Contest-----------------------------------------//
 
 func SetBoard(id int64, statue int) bool {
 	mySQLDB := GetMySQLDB()
 	updateBoardType := fmt.Sprintf("UPDATE contest_contestboard SET type = %d WHERE submitid = %d", statue, id)
 	if res := mySQLDB.Exec(updateBoardType); res.Error != nil {
 		logrus.Error("update board type error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func GetNotExpiredContest() []*dao.ConstInfo {
+	mySQLDB := GetMySQLDB()
+	var data []*dao.ConstInfo
+	res := mySQLDB.Raw("SELECT * from contest_contestinfo where type <> 'Personal' and TO_SECONDS(NOW()) - TO_SECONDS(begintime) <= lasttime").Scan(&data)
+	if res.Error != nil {
+		logrus.Error("select not expired contest error ", res.Error)
+		return nil
+	}
+	return data
+}
+
+func GetRunningContest() []*dao.ConstInfo {
+	mySQLDB := GetMySQLDB()
+	var data []*dao.ConstInfo
+	res := mySQLDB.Raw(
+		"SELECT * from contest_contestinfo where type <> 'Personal' and " +
+			"TO_SECONDS(NOW()) - TO_SECONDS(begintime) <= lasttime and TO_SECONDS(NOW()) - TO_SECONDS(begintime) >=-1").Scan(&data)
+	if res.Error != nil {
+		logrus.Error("select not expired contest error ", res.Error)
+		return nil
+	}
+	return data
+}
+
+func GetContestProblem(contestId int) []*dao.Problem {
+	mySQLDB := GetMySQLDB()
+	problems := []*dao.Problem{}
+	if res := mySQLDB.Raw("SELECT * from contest_contestproblem where contestid= ?", contestId).Scan(&problems); res.Error != nil {
+		logrus.Error("select contest problem error ", res.Error)
+		return nil
+	}
+	return problems
+}
+
+func UpdateContestBoardTypeBySubmitId(typ, id int) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE contest_contestboard SET type = ?  WHERE submitid = ?", typ, id); res.Error != nil {
+		logrus.Error("update contest board type error ", res.Error)
+		return false
+	}
+	return true
+}
+
+//---------------------------------User-----------------------------------------//
+
+func UpdateUserResult(username, result string) bool {
+	mySQLDB := GetMySQLDB()
+	updateSQL := fmt.Sprintf("UPDATE problem_problemdata SET %s = %s + 1 WHRER username = %s", result, result, username)
+	if res := mySQLDB.Exec(updateSQL); res.Error != nil {
+		logrus.Error("update user result error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateUserScore(username string, score int) bool {
+	mySQLDB := GetMySQLDB()
+	updateSQL := fmt.Sprintf("UPDATE user_userdata SET score = score+%d WHERE username = '%s'", score, username)
+	if res := mySQLDB.Exec(updateSQL); res.Error != nil {
+		logrus.Error("update user score error ", res.Error)
+		return false
+	}
+	return true
+}
+
+func UpdateUserAcPro(problem, username string) bool {
+	mySQLDB := GetMySQLDB()
+	updateSQL := fmt.Sprintf("UPDATE user_userdata SET acpro = concat(acpro,'|%s') WHERE username = '%s'", problem, username)
+	if res := mySQLDB.Exec(updateSQL); res.Error != nil {
+		logrus.Error("update user score error ", res.Error)
 		return false
 	}
 	return true
