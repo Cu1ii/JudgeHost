@@ -16,6 +16,7 @@ func RunJudge() {
 		logrus.Info("pending status = ", len(pendingStatus))
 		for _, status := range pendingStatus {
 			database.UpdateJudgeStatusResult(int(status.Id), constent.WAITING)
+			database.UpdateJudgeStatusJudger(int(status.Id), "XOJ")
 		}
 		for _, status := range pendingStatus {
 			if err := pool.GetJudgePool().Submit(

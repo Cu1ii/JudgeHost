@@ -47,6 +47,15 @@ func UpdateJudgeStatusMessage(id int, msg string) bool {
 	return true
 }
 
+func UpdateJudgeStatusJudger(id int, judger string) bool {
+	mySQLDB := GetMySQLDB()
+	if res := mySQLDB.Exec("UPDATE judge_backend.judgestatus_judgestatus SET judger = ? WHERE id = ?", judger, id); res.Error != nil {
+		logrus.Error("update judge status error ", res.Error)
+		return false
+	}
+	return true
+}
+
 func UpdateJudgeStatus(id int, memory, mytime int, result int, testcase string) bool {
 	mySQLDB := GetMySQLDB()
 	if res := mySQLDB.Exec("UPDATE judgestatus_judgestatus SET memory = ?, time= ?, result = ?, testcase=?  WHERE id = ?", memory, mytime, result, testcase, id); res.Error != nil {
@@ -144,6 +153,7 @@ func UpdateProblemDataAuth(pk string, auth int) bool {
 
 func AddCaseStatus(status *dao.CaseStatus) bool {
 	mySQLDB := GetMySQLDB()
+	logrus.Info("insert case = ", status)
 	if create := mySQLDB.Exec("INSERT INTO judgestatus_casestatus "+
 		"(statusid, username, problem, result, time, memory, testcase, casedata, outputdata, useroutput)"+
 		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -214,7 +224,7 @@ func UpdateContestBoardTypeBySubmitId(typ, id int) bool {
 
 func UpdateUserResult(username, result string) bool {
 	mySQLDB := GetMySQLDB()
-	updateSQL := fmt.Sprintf("UPDATE problem_problemdata SET %s = %s + 1 WHRER username = %s", result, result, username)
+	updateSQL := fmt.Sprintf("UPDATE user_userdata SET %s = %s + 1 WHERE username = '%s'", result, result, username)
 	if res := mySQLDB.Exec(updateSQL); res.Error != nil {
 		logrus.Error("update user result error ", res.Error)
 		return false
@@ -236,7 +246,7 @@ func UpdateUserAcPro(problem, username string) bool {
 	mySQLDB := GetMySQLDB()
 	updateSQL := fmt.Sprintf("UPDATE user_userdata SET acpro = concat(acpro,'|%s') WHERE username = '%s'", problem, username)
 	if res := mySQLDB.Exec(updateSQL); res.Error != nil {
-		logrus.Error("update user score error ", res.Error)
+		logrus.Error("update user ac problem error ", res.Error)
 		return false
 	}
 	return true

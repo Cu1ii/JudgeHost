@@ -53,11 +53,12 @@ func acProblem(id int, problem, message string, memory, time int, username strin
 	if !isAc {
 		database.UpdateUserResult(username, "ac")
 		database.UpdateUserScore(username, proScore)
+		database.UpdateUserAcPro(problem, username)
 	}
 	if contest != 0 {
 		database.UpdateContestBoardTypeBySubmitId(1, id)
 	}
-	database.UpdateUserResult("submit", username)
+	database.UpdateUserResult(username, "submit")
 }
 
 func doneCase(statusId int, username, problem, result string,

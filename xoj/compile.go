@@ -43,7 +43,7 @@ func compileC(id int, code, submissionPath, problem string) bool {
 	if _, err := util.WriteDataToFilePath(code, codePath); err != nil {
 		logrus.Error(err.Error())
 	}
-	compileCmd := exec.Command("./shell/compileC.sh", submissionPath, strconv.FormatInt(int64(id), 10))
+	compileCmd := exec.Command("/home/cu1/XOJ/shell/compileC.sh", submissionPath, strconv.FormatInt(int64(id), 10))
 	if err := compileCmd.Run(); err != nil {
 		logrus.Error(err.Error())
 		var msg string
@@ -77,7 +77,7 @@ func compileCPP(id int, code, submissionPath, problem string) bool {
 	if _, err := util.WriteDataToFilePath(code, codePath); err != nil {
 		logrus.Error(err.Error())
 	}
-	compileCmd := exec.Command("./shell/compileCPP.sh", submissionPath, strconv.FormatInt(int64(id), 10))
+	compileCmd := exec.Command("/home/cu1/XOJ/shell/compileCPP.sh", submissionPath, strconv.FormatInt(int64(id), 10))
 	if err := compileCmd.Run(); err != nil {
 		logrus.Error(err.Error())
 		var msg string
@@ -147,7 +147,7 @@ func compileGo(id int, code, submissionPath, problem string) bool {
 	if _, err := util.WriteDataToFilePath(code, codePath); err != nil {
 		logrus.Error(err.Error())
 	}
-	compileCmd := exec.Command("./shell/compileGo.sh", submissionPath, strconv.FormatInt(int64(id), 10))
+	compileCmd := exec.Command("/home/cu1/XOJ/shell/compileGo.sh", submissionPath, strconv.FormatInt(int64(id), 10))
 	if err := compileCmd.Run(); err != nil {
 		logrus.Error(err.Error())
 		var msg string
@@ -181,7 +181,7 @@ func compileJava(id int, code, submissionPath, problem string) bool {
 	if _, err := util.WriteDataToFilePath(code, codePath); err != nil {
 		logrus.Error(err.Error())
 	}
-	compileCmd := exec.Command("./shell/compileJava.sh", submissionPath, strconv.FormatInt(int64(id), 10))
+	compileCmd := exec.Command("/home/cu1/XOJ/shell/compileJava.sh", submissionPath, strconv.FormatInt(int64(id), 10))
 	if err := compileCmd.Run(); err != nil {
 		logrus.Error(err.Error())
 		var msg string
@@ -212,7 +212,7 @@ func compileSwift(id int, code, submissionPath, problem string) bool {
 	if _, err := util.WriteDataToFilePath(code, codePath); err != nil {
 		logrus.Error(err.Error())
 	}
-	compileCmd := exec.Command("./shell/compileJava.sh", submissionPath, strconv.FormatInt(int64(id), 10))
+	compileCmd := exec.Command("/home/cu1/XOJ/shell/compileJava.sh", submissionPath, strconv.FormatInt(int64(id), 10))
 	if err := compileCmd.Run(); err != nil {
 		logrus.Error(err.Error())
 		var msg string
