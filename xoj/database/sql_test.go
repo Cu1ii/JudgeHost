@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+func TestSelectAllJudgeStatus(t *testing.T) {
+	judgeStatus := GetJudgeAllStatus()
+	for _, status := range judgeStatus {
+		fmt.Println(status)
+	}
+}
+
 func TestSelectJudgeArry(t *testing.T) {
 	judgeStatus := GetJudgeStatus()
 	for _, status := range judgeStatus {
@@ -41,4 +48,12 @@ func TestUpdateJudgeStatusResult(t *testing.T) {
 func TestUpdateJudgeStatusMessage(t *testing.T) {
 	res := UpdateJudgeStatusMessage(1, "111")
 	fmt.Println(res)
+}
+
+func TestSelectContestProblemByContestId(t *testing.T) {
+	judgeStatus := GetContestProblem(4)
+	fmt.Println(len(judgeStatus))
+	for _, status := range judgeStatus {
+		fmt.Println(status)
+	}
 }

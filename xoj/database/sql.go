@@ -9,6 +9,16 @@ import (
 
 //---------------------------------JudgeStatus-----------------------------------------//
 
+func GetJudgeAllStatus() []*dao.JudgeStatus {
+	mySQLDB := GetMySQLDB()
+	judgeArry := []*dao.JudgeStatus{}
+	if res := mySQLDB.Raw("SELECT * FROM judgestatus_judgestatus").Scan(&judgeArry); res.Error != nil {
+		logrus.Error("select judge status error ", res.Error)
+		return nil
+	}
+	return judgeArry
+}
+
 func GetJudgeStatus() []*dao.JudgeStatus {
 	mySQLDB := GetMySQLDB()
 	judgeArry := []*dao.JudgeStatus{}
@@ -142,6 +152,7 @@ func UpdateProblemAuth(pk string, auth int) bool {
 
 func UpdateProblemDataAuth(pk string, auth int) bool {
 	mySQLDB := GetMySQLDB()
+	logrus.Info("pk = ", pk, " auth = ", auth)
 	if res := mySQLDB.Exec("UPDATE  problem_problemdata SET auth = ? WHERE problem = ?", auth, pk); res.Error != nil {
 		logrus.Error("update problem data auth error ", res.Error)
 		return false
@@ -153,7 +164,6 @@ func UpdateProblemDataAuth(pk string, auth int) bool {
 
 func AddCaseStatus(status *dao.CaseStatus) bool {
 	mySQLDB := GetMySQLDB()
-	logrus.Info("insert case = ", status)
 	if create := mySQLDB.Exec("INSERT INTO judgestatus_casestatus "+
 		"(statusid, username, problem, result, time, memory, testcase, casedata, outputdata, useroutput)"+
 		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -188,6 +198,16 @@ func GetNotExpiredContest() []*dao.ConstInfo {
 	return data
 }
 
+func GetContestProblem(contestId int) []*dao.ContestProblem {
+	mySQLDB := GetMySQLDB()
+	var problems []*dao.ContestProblem
+	if res := mySQLDB.Raw("SELECT * FROM contest_contestproblem WHERE contestid = ?", contestId).Scan(&problems); res.Error != nil {
+		logrus.Error("select contest problem error ", res.Error)
+		return nil
+	}
+	return problems
+}
+
 func GetRunningContest() []*dao.ConstInfo {
 	mySQLDB := GetMySQLDB()
 	var data []*dao.ConstInfo
@@ -201,18 +221,15 @@ func GetRunningContest() []*dao.ConstInfo {
 	return data
 }
 
-func GetContestProblem(contestId int) []*dao.Problem {
-	mySQLDB := GetMySQLDB()
-	problems := []*dao.Problem{}
-	if res := mySQLDB.Raw("SELECT * from contest_contestproblem where contestid= ?", contestId).Scan(&problems); res.Error != nil {
-		logrus.Error("select contest problem error ", res.Error)
-		return nil
-	}
-	return problems
-}
-
 func UpdateContestBoardTypeBySubmitId(typ, id int) bool {
 	mySQLDB := GetMySQLDB()
+	// 后端插入 contestBoard 可能会晚于此处更新, 所以要先等待相应 contestBoard 插入后再更新
+	for true {
+		tp := -2
+		if res := mySQLDB.Raw("SELECT type FROM contest_contestboard  WHERE submitid = ?", id).Scan(&tp); res.Error == nil && tp != -2 {
+			break
+		}
+	}
 	if res := mySQLDB.Exec("UPDATE contest_contestboard SET type = ?  WHERE submitid = ?", typ, id); res.Error != nil {
 		logrus.Error("update contest board type error ", res.Error)
 		return false

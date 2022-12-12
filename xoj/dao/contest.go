@@ -3,7 +3,7 @@ package dao
 import "time"
 
 type ConstInfo struct {
-	Id        int
+	Id        int `gorm:"primaryKey"`
 	Creator   string
 	Oj        string
 	Title     string
@@ -22,9 +22,9 @@ type ConstInfo struct {
 }
 
 type ContestProblem struct {
-	Id           int
-	ContestId    int
-	ProblemId    string
-	ProblemTitle string
+	Id           int    `gorm:"primaryKey"`
+	ContestId    int    `gorm:"column:contestid"`
+	ProblemId    string `gorm:"column:problemid"`
+	ProblemTitle string `gorm:"column:problemtitle"`
 	Rank         int
 }

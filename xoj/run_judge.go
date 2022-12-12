@@ -13,7 +13,6 @@ func RunJudge() {
 	for true {
 		time.Sleep(time.Second * 2)
 		pendingStatus := database.GetJudgeStatus()
-		logrus.Info("pending status = ", len(pendingStatus))
 		for _, status := range pendingStatus {
 			database.UpdateJudgeStatusResult(int(status.Id), constent.WAITING)
 			database.UpdateJudgeStatusJudger(int(status.Id), "XOJ")
@@ -54,10 +53,11 @@ func changeAuth() {
 			allContest[notExpiredContest.Id] = true
 			contestProblems := database.GetContestProblem(notExpiredContest.Id)
 			for _, pro := range contestProblems {
-				if _, ok := curPro[pro.Problem]; !ok {
-					curPro[pro.Problem] = true
-					database.UpdateProblemDataAuth(pro.Problem, 2)
-					database.UpdateProblemAuth(pro.Problem, 2)
+				if _, ok := curPro[pro.ProblemId]; !ok {
+					logrus.Info("58 pro.Problem", pro.ProblemId)
+					curPro[pro.ProblemId] = true
+					database.UpdateProblemDataAuth(pro.ProblemId, 2)
+					database.UpdateProblemAuth(pro.ProblemId, 2)
 				}
 			}
 		}
@@ -65,10 +65,10 @@ func changeAuth() {
 		for _, runningContest := range runningContests {
 			contestProblems := database.GetContestProblem(runningContest.Id)
 			for _, pro := range contestProblems {
-				if _, ok := curRunPro[pro.Problem]; !ok {
-					curRunPro[pro.Problem] = true
-					database.UpdateProblemDataAuth(pro.Problem, 3)
-					database.UpdateProblemAuth(pro.Problem, 3)
+				if _, ok := curRunPro[pro.ProblemId]; !ok {
+					curRunPro[pro.ProblemId] = true
+					database.UpdateProblemDataAuth(pro.ProblemId, 3)
+					database.UpdateProblemAuth(pro.ProblemId, 3)
 				}
 			}
 		}
@@ -76,14 +76,14 @@ func changeAuth() {
 			if _, ok := allContest[contestId]; !ok {
 				contestProblems := database.GetContestProblem(contestId)
 				for _, pro := range contestProblems {
-					if _, ok := curPro[pro.Problem]; ok {
-						delete(curPro, pro.Problem)
+					if _, ok := curPro[pro.ProblemId]; ok {
+						delete(curPro, pro.ProblemId)
 					}
-					if _, ok := curRunPro[pro.Problem]; ok {
-						delete(curRunPro, pro.Problem)
+					if _, ok := curRunPro[pro.ProblemId]; ok {
+						delete(curRunPro, pro.ProblemId)
 					}
-					database.UpdateProblemDataAuth(pro.Problem, 1)
-					database.UpdateProblemAuth(pro.Problem, 1)
+					database.UpdateProblemDataAuth(pro.ProblemId, 1)
+					database.UpdateProblemAuth(pro.ProblemId, 1)
 				}
 			}
 		}
