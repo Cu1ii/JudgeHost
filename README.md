@@ -8,6 +8,9 @@
 
 后续会提供 **Docker 环境**作为运行环境
 
+xoj 部分为 [JudgeServer](https://github.com/Cu1ii/JudgeServer) 项目未分离前的模块, 适用于通过数据库进行交互的判题服务器, 详情请点击
+[JudgeServer](https://github.com/Cu1ii/JudgeServer)
+
 ### 快速上手
 
 ```shell

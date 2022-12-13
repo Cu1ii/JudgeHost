@@ -51,7 +51,7 @@ func TestUpdateJudgeStatusMessage(t *testing.T) {
 }
 
 func TestSelectContestProblemByContestId(t *testing.T) {
-	judgeStatus := GetContestProblem(4)
+	judgeStatus := GetContestProblem(5)
 	fmt.Println(len(judgeStatus))
 	for _, status := range judgeStatus {
 		fmt.Println(status)
