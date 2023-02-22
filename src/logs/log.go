@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"JudgeHost/src/global"
 	"bytes"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/gin"
@@ -20,13 +21,11 @@ func (m *mineFomatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return nil, nil
 }
 
-func init() {
+func InitLog() {
 	gin.DefaultWriter = os.Stdout
 	initRuntimeLog()
 	initWebLog()
 }
-
-var logger *logrus.Logger
 
 func initRuntimeLog() {
 	logrus.SetReportCaller(true)
@@ -46,8 +45,8 @@ func initRuntimeLog() {
 
 func initWebLog() {
 	// 获得实例
-	logger = logrus.New()
-	logger.SetReportCaller(true)
+	global.Logger = logrus.New()
+	global.Logger.SetReportCaller(true)
 	var (
 		logFilePath = "log/" //文件存储路径
 		logFileName = "system.logs"
@@ -60,9 +59,9 @@ func initWebLog() {
 		log.Fatal("打开/写入文件失败", err)
 	}
 	// 日志级别
-	logger.SetLevel(logrus.DebugLevel)
+	global.Logger.SetLevel(logrus.DebugLevel)
 	// 设置输出
-	logger.Out = file
+	global.Logger.Out = file
 	// 设置 rotatelogs,实现文件分割
 	logWriter, err := rotatelogs.New(
 		// 分割后的文件名称
@@ -85,33 +84,12 @@ func initWebLog() {
 	}
 	//给logrus添加hook
 	// hook 自己的 formatter 不需要再使用, 让 logger 调用自己的 formatter 处理日志即可
-	logger.AddHook(lfshook.NewHook(writerMap, &mineFomatter{}))
+	global.Logger.AddHook(lfshook.NewHook(writerMap, &mineFomatter{}))
 
-	logger.SetFormatter(&nested.Formatter{
+	global.Logger.SetFormatter(&nested.Formatter{
 		// HideKeys:        true,
 		FieldsOrder:     []string{"status_code", "client_ip", "req_method", "req_uri"},
 		TimestampFormat: time.RFC3339,
 		NoColors:        false,
 	})
-}
-
-func LogMiddleWare() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		//请求方式
-		method := c.Request.Method
-		//请求路由
-		reqUrl := c.Request.RequestURI
-		//状态码
-		statusCode := c.Writer.Status()
-		//请求ip
-		clientIP := c.ClientIP()
-		// 打印日志
-		logger.WithFields(logrus.Fields{
-			"status_code": statusCode,
-			"client_ip":   clientIP,
-			"req_method":  method,
-			"req_uri":     reqUrl,
-		}).Info()
-	}
 }

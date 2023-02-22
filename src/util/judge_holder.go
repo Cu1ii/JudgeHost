@@ -53,7 +53,7 @@ func GetRunnerScriptPath() string {
 	return GetSubmissionWorkingPath() + "/" + RunnerScriptName
 }
 
-func GetJudgeConfig() *dto.JudgeDTO {
+func GetJudgeConfig() *dto.JudgeRequest {
 	return GetJudgeConfiguration().JudgeConfig
 }
 

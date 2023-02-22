@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"JudgeHost/src/config/global"
 	"fmt"
 )
 
@@ -18,7 +17,7 @@ type SingleJudgeResultDTO struct {
 
 func (p *SingleJudgeResultDTO) SetMessage() {
 	var err error
-	p.Message, err = global.ToJudgeResultType(p.Condition)
+	//p.Message, err = global.ToJudgeResultType(p.Condition)
 	if err != nil {
 		fmt.Println(err)
 	}
