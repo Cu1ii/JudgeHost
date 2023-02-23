@@ -6,6 +6,7 @@ import (
 	"JudgeHost/src/logs"
 	"JudgeHost/src/middleware"
 	"JudgeHost/src/setting"
+	"JudgeHost/src/util"
 	"JudgeHost/src/util/pool"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,10 @@ func init() {
 
 	if err := pool.InitPool(); err != nil {
 		logrus.Fatalf("init.pool err: %v", err)
+	}
+
+	if err := util.InitValidate(); err != nil {
+		logrus.Fatalf("init.validate err: %v", err)
 	}
 
 }

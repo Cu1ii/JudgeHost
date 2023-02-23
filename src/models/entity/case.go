@@ -1,7 +1,6 @@
 package entity
 
 type CaseStatus struct {
-	Problem    string
 	Result     string
 	Time       int
 	Memory     int

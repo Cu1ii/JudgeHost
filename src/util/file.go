@@ -54,6 +54,17 @@ func ZipDictionary(zippedPath, targetPath string) (bool, error) {
 	return true, nil
 }
 
+// UnZipInDictionary  解压缩 zip 至当前文件夹
+func UnZipInDictionary(zippedPath, targetPath string) (bool, error) {
+	fmt.Println(zippedPath)
+	zipCmd := exec.Command("unzip", "-d", targetPath, zippedPath)
+	if err := zipCmd.Run(); err != nil {
+		fmt.Println("Execute failed when unzip:" + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
 // ReadFileByLines 讲目标文件中的数据按行读取
 func ReadFileByLines(filePath string) ([]string, error) {
 	file, err := os.Open(filePath)

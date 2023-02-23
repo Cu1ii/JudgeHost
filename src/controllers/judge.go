@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"JudgeHost/src/common"
+	"JudgeHost/src/judge"
 	"JudgeHost/src/models/dto"
 	"JudgeHost/src/util"
 	"github.com/gin-gonic/gin"
@@ -25,6 +25,10 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
-
-	context.JSON(http.StatusOK, common.NewUnifiedResponseMessgaeData("judge result", judgeTask.JudgeResult))
+	var res string
+	err := judge.RunJudge(&judgeRequest, &res)
+	if err != nil {
+		logrus.Error("")
+	}
+	context.JSON(http.StatusOK, gin.H{"msg": res})
 }

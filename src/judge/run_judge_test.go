@@ -1,5 +1,6 @@
 package judge
 
+//
 //import (
 //	"fmt"
 //	"testing"

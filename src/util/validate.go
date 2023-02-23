@@ -16,11 +16,13 @@ var (
 	trans, _ = uni.GetTranslator("zh")  // 获取翻译字典
 )
 
-func init() {
+func InitValidate() error {
 	// 注册翻译器
 	if err := zhs.RegisterDefaultTranslations(validate, trans); err != nil {
 		logrus.Debug("register default translations fail: ", err.Error(), time.Now().UTC().String())
+		return err
 	}
+	return nil
 }
 
 func ValidateStructCheck(verifyEntity interface{}) validator.ValidationErrorsTranslations {
