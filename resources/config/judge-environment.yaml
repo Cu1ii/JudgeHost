@@ -1,4 +1,0 @@
-judge-environment:
-  submission-path: /home/cu1/judgeEnvironment/submissions
-  script-path: /home/cu1/judgeEnvironment/scripts
-  resolution-path: /home/cu1/judgeEnvironment/resolutions
