@@ -5,8 +5,8 @@ app:
   app_url: http://localhost
 
 judge-environment:
-  submission-path: /home/cu1/judgeEnvironment/submissions
-  resolution-path: /home/cu1/judgeEnvironment/resolutions
+  submission_path: /home/cu1/XOJ/submission
+  resolution_path: /home/cu1/XOJ/resolutions
 
 judge-host-exceptions:
   codes:

@@ -11,9 +11,9 @@ func TestJudgeCPP(t *testing.T) {
 		64,
 		1,
 		"/home/cu1/XOJ/resolutions/1/0.in",
-		"/home/cu1/XOJ/submission/1/0temp.out",
-		"/home/cu1/XOJ/submission/1/1error.out",
-		"/home/cu1/XOJ/submission/1/1log.out",
+		"/home/cu1/judgeEnvironment/submissions/1/1temp.out",
+		"/home/cu1/judgeEnvironment/submissions/1/1error.out",
+		"/home/cu1/judgeEnvironment/submissions/1/1log.out",
 	)
 	fmt.Println(res)
 }

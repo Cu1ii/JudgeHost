@@ -13,4 +13,4 @@ RUN mkdir build && cd build && cmake ../JudgerCore && make && make install && cd
 
 RUN cd $GOPATH/src/judge-host && go build .
 
-ENTRYPOINT ["./judge-host"]
+ENTRYPOINT ["./JudgeHost"]
