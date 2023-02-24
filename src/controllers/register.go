@@ -6,7 +6,6 @@ import (
 
 func LoadControllers(e *gin.Engine) {
 	LoadBaseController(e)
-	LoadFileController(e)
 	LoadCommonController(e)
 	LoadJudgeControllers(e)
 }

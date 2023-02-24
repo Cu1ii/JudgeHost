@@ -8,8 +8,8 @@ type App struct {
 }
 
 type JudgeEnvironment struct {
-	SubmissionPath string `mapstructure:"submission-path" yaml:"submission-path:"`
-	ResolutionPath string `mapstructure:"resolution-path" yaml:"resolution-path:"`
+	SubmissionPath string `mapstructure:"submission_path" yaml:"submission_path:"`
+	ResolutionPath string `mapstructure:"resolution_path" yaml:"resolution_path:"`
 }
 
 type JudgeHostExceptions struct {
