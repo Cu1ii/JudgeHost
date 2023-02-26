@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"JudgeHost/src/judge"
-	"JudgeHost/src/models/dto"
 	"JudgeHost/src/util"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ func LoadJudgeControllers(e *gin.Engine) {
 }
 
 func RunJudge(context *gin.Context) {
-	judgeRequest := dto.JudgeRequest{}
+	judgeRequest := judge.JudgeRequest{}
 	if err := context.ShouldBind(&judgeRequest); err != nil {
 		context.JSON(500, gin.H{"msg": err})
 		return
@@ -25,10 +24,9 @@ func RunJudge(context *gin.Context) {
 		context.JSON(500, gin.H{"msg": err})
 		return
 	}
-	var res string
-	err := judge.RunJudge(&judgeRequest, &res)
+	rep, err := judge.RunJudge(&judgeRequest)
 	if err != nil {
 		logrus.Error("")
 	}
-	context.JSON(http.StatusOK, gin.H{"msg": res})
+	context.JSON(http.StatusOK, gin.H{"msg": rep})
 }

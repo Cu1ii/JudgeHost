@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func compile(submissionId int, code, submissionPath, language string) (bool, string) {
+func compile(submissionId int, code, submissionPath, language string) (bool, *JudgeResponse) {
 	switch language {
 	case "C":
 		return compileC(submissionId, code, submissionPath)
@@ -31,7 +31,7 @@ func compile(submissionId int, code, submissionPath, language string) (bool, str
 	}
 }
 
-func compileC(id int, code, submissionPath string) (bool, string) {
+func compileC(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -60,10 +60,10 @@ func compileC(id int, code, submissionPath string) (bool, string) {
 		}
 		return false, compileError(msg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func compileCPP(id int, code, submissionPath string) (bool, string) {
+func compileCPP(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -92,10 +92,10 @@ func compileCPP(id int, code, submissionPath string) (bool, string) {
 		}
 		return false, compileError(msg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func compilePython2(id int, code, submissionPath string) (bool, string) {
+func compilePython2(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if filterWord := pythonFilters(code); filterWord != "0" {
 		return false, compileError("Your code has sensitive words " + filterWord)
@@ -111,10 +111,10 @@ func compilePython2(id int, code, submissionPath string) (bool, string) {
 		logrus.Error(err.Error())
 		return false, compileError("System error")
 	}
-	return true, ""
+	return true, nil
 }
 
-func compilePython3(id int, code, submissionPath string) (bool, string) {
+func compilePython3(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if filterWord := pythonFilters(code); filterWord != "0" {
 		return false, compileError("Your code has sensitive words " + filterWord)
@@ -130,10 +130,10 @@ func compilePython3(id int, code, submissionPath string) (bool, string) {
 		logrus.Error(err.Error())
 		return false, compileError("System error")
 	}
-	return true, ""
+	return true, nil
 }
 
-func compileGo(id int, code, submissionPath string) (bool, string) {
+func compileGo(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -164,10 +164,10 @@ func compileGo(id int, code, submissionPath string) (bool, string) {
 		}
 		return false, compileError(msg)
 	}
-	return true, ""
+	return true, nil
 }
 
-func compileJava(id int, code, submissionPath string) (bool, string) {
+func compileJava(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -195,11 +195,11 @@ func compileJava(id int, code, submissionPath string) (bool, string) {
 		return false, compileError(msg)
 
 	}
-	return true, ""
+	return true, nil
 }
 
 // 还没有支持, 当前环境没有装 swift
-func compileSwift(id int, code, submissionPath string) (bool, string) {
+func compileSwift(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -231,7 +231,7 @@ func compileSwift(id int, code, submissionPath string) (bool, string) {
 		return false, compileError(msg)
 
 	}
-	return true, ""
+	return true, nil
 }
 
 func pythonFilters(code string) string {

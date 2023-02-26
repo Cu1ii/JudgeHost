@@ -1,4 +1,4 @@
-package entity
+package judge
 
 type CaseStatus struct {
 	Result     string

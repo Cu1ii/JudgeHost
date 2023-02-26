@@ -2,7 +2,6 @@ package judge
 
 import (
 	"JudgeHost/src/global"
-	"JudgeHost/src/models/vo"
 	"JudgeHost/src/util"
 	"errors"
 	"fmt"
@@ -30,15 +29,13 @@ func judge(submitId,
 	language string,
 	problem int,
 	isOI int,
-	spj bool,
-	res *string) error {
+	spj bool) (*JudgeResponse, error) {
 
-	rep := vo.ResponseVo{}
+	rep := JudgeResponse{}
 	logrus.Info("Begin to Compile!")
 	if success, r := compile(submitId, code, global.JudgeEnvironmentSetting.SubmissionPath, language); !success {
 		logrus.Debug("compile ", problem, " fail")
-		*res = r
-		return errors.New("compile" + strconv.FormatInt(int64(problem), 10) + "fail")
+		return r, errors.New("compile" + strconv.FormatInt(int64(problem), 10) + "fail")
 	}
 	// submitTime := submittime.Unix() // 似乎并没有什么用
 	//runPath := fmt.Sprintf("%s/%d/%d.out", XojSubmissionPath, id, id)
@@ -57,35 +54,35 @@ func judge(submitId,
 	}
 	files, err := filepath.Glob(resolutionPath + "/*")
 	if err != nil || len(files) == 0 {
-		*res = doneProblem("get resolution error!",
+		res := doneProblem("get resolution error!",
 			0,
 			0,
 			5,
 			"?",
 			&rep)
 		logrus.Error(err)
-		return err
+		return res, err
 	}
 	zipPath := fmt.Sprintf("%s/%d.zip", resolutionPath, problem)
 	// resolutionPath + "/" + problem + ".zip"
 	if util.IsFileIn(zipPath) {
 		if isSuccess, err := util.UnZipInDictionary(zipPath, resolutionPath); !isSuccess || err != nil {
-			*res = doneProblem("unzip "+strconv.FormatInt(int64(problem), 10)+".zip error!",
+			res := doneProblem("unzip "+strconv.FormatInt(int64(problem), 10)+".zip error!",
 				0,
 				0,
 				5,
 				"?",
 				&rep)
-			return err
+			return res, err
 		}
 		if isSuccess, err := util.DeleteFile(zipPath, true); !isSuccess || err != nil {
-			*res = doneProblem("delete resolution zip error!",
+			res := doneProblem("delete resolution zip error!",
 				0,
 				0,
 				5,
 				"?",
 				&rep)
-			return err
+			return res, err
 		}
 	}
 	logrus.Info("resolution path = ", resolutionPath)
@@ -302,9 +299,9 @@ func judge(submitId,
 	}
 	// 汇总所有结果
 	if myResult == 100 {
-		*res = acProblem(maxMemory/1024/1024, maxTime, &rep)
+		rep = *acProblem(maxMemory/1024/1024, maxTime, &rep)
 	} else {
-		*res = doneProblem("",
+		rep = *doneProblem("",
 			myMemory/1024/1024,
 			myTime,
 			myResult,
@@ -315,7 +312,7 @@ func judge(submitId,
 	fmt.Sprintf("%s", myTestcase)
 
 	logrus.Info("All done!")
-	return nil
+	return &rep, nil
 }
 
 func singleJudge(timeLimit,

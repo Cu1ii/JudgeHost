@@ -1,4 +1,4 @@
-package dto
+package judge
 
 type JudgeRequest struct {
 	ProblemId       int    `form:"problemId" validate:"required" json:"problem_id"`
