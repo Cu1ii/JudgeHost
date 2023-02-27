@@ -21,9 +21,9 @@ func doneProblem(
 	responseVo *JudgeResponse) *JudgeResponse {
 	// fmt.Println(id, " ", problem, " ", message, " ", mytime, " ", username, " ", contest, " ", result, " ", testcase)
 
-	responseVo.CpuTime = cpuTime
-	responseVo.Memory = memory
-	responseVo.Result = result
+	responseVo.CpuTime = int64(cpuTime)
+	responseVo.Memory = int64(memory)
+	responseVo.Result = int64(result)
 
 	if message == "" {
 		responseVo.Msg = util.TransformResultToString(responseVo.Result)
@@ -31,7 +31,7 @@ func doneProblem(
 		responseVo.Msg = message
 	}
 	if testcase != "" {
-		responseVo.AppendCase(&CaseStatus{TestCase: testcase})
+		responseVo.AppendCase(&CaseStatus{Testcase: testcase})
 	}
 	return responseVo
 }
@@ -39,8 +39,8 @@ func doneProblem(
 func acProblem(memory, cpuTime int, responseVo *JudgeResponse) *JudgeResponse {
 	responseVo.Msg = "Accept"
 	responseVo.Result = 0
-	responseVo.Memory = memory
-	responseVo.CpuTime = cpuTime
+	responseVo.Memory = int64(memory)
+	responseVo.CpuTime = int64(cpuTime)
 	return responseVo
 }
 
@@ -54,11 +54,15 @@ func doneCase(result string,
 	rep *JudgeResponse) {
 	rep.AppendCase(&CaseStatus{
 		Result:     result,
-		Time:       time,
-		Memory:     memory,
-		TestCase:   testcase,
+		Time:       int64(time),
+		Memory:     int64(memory),
+		Testcase:   testcase,
 		CaseData:   caseData,
 		OutputData: outputData,
 		UserOutput: userOutput,
 	})
+}
+
+func (x *JudgeResponse) AppendCase(caseStatus *CaseStatus) {
+	x.CaseArray = append(x.CaseArray, caseStatus)
 }

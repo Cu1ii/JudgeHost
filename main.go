@@ -57,12 +57,12 @@ func setupSetting() error {
 
 func main() {
 	grpcServer := grpc.NewServer()
-	RegisterHelloServiceServer(grpcServer, new(judge.JudgeServiceImpl))
+	judge.RegisterJudgeServiceServer(grpcServer, new(judge.JudgeServiceImpl))
 	lis, err := net.Listen("tcp", ":"+strconv.FormatInt(int64(global.AppSetting.Port), 10))
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer.Serve(lis)
+	_ = grpcServer.Serve(lis)
 }
 
 //defer global.JudgeExecutorPool.Release()

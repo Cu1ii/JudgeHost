@@ -22,7 +22,7 @@ func TransToJson(obj interface{}) (string, error) {
 	return string(marshal), nil
 }
 
-func TransformResultToString(result int) string {
+func TransformResultToString(result int64) string {
 	if result == 2 || result == 1 {
 		return "Time Limit Exceeded"
 	}

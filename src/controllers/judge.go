@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"JudgeHost/src"
 	"JudgeHost/src/judge"
 	"JudgeHost/src/util"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func LoadJudgeControllers(e *gin.Engine) {
 }
 
 func RunJudge(context *gin.Context) {
-	judgeRequest := judge.JudgeRequest{}
+	judgeRequest := src.JudgeRequest{}
 	if err := context.ShouldBind(&judgeRequest); err != nil {
 		context.JSON(500, gin.H{"msg": err})
 		return

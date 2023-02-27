@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func compile(submissionId int, code, submissionPath, language string) (bool, *JudgeResponse) {
+func compile(submissionId int64, code, submissionPath, language string) (bool, *JudgeResponse) {
 	switch language {
 	case "C":
 		return compileC(submissionId, code, submissionPath)
@@ -31,7 +31,7 @@ func compile(submissionId int, code, submissionPath, language string) (bool, *Ju
 	}
 }
 
-func compileC(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compileC(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -63,7 +63,7 @@ func compileC(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	return true, nil
 }
 
-func compileCPP(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compileCPP(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -95,7 +95,7 @@ func compileCPP(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	return true, nil
 }
 
-func compilePython2(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compilePython2(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if filterWord := pythonFilters(code); filterWord != "0" {
 		return false, compileError("Your code has sensitive words " + filterWord)
@@ -114,7 +114,7 @@ func compilePython2(id int, code, submissionPath string) (bool, *JudgeResponse) 
 	return true, nil
 }
 
-func compilePython3(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compilePython3(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if filterWord := pythonFilters(code); filterWord != "0" {
 		return false, compileError("Your code has sensitive words " + filterWord)
@@ -133,7 +133,7 @@ func compilePython3(id int, code, submissionPath string) (bool, *JudgeResponse) 
 	return true, nil
 }
 
-func compileGo(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compileGo(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -167,7 +167,7 @@ func compileGo(id int, code, submissionPath string) (bool, *JudgeResponse) {
 	return true, nil
 }
 
-func compileJava(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compileJava(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
@@ -199,7 +199,7 @@ func compileJava(id int, code, submissionPath string) (bool, *JudgeResponse) {
 }
 
 // 还没有支持, 当前环境没有装 swift
-func compileSwift(id int, code, submissionPath string) (bool, *JudgeResponse) {
+func compileSwift(id int64, code, submissionPath string) (bool, *JudgeResponse) {
 	submissionPath = fmt.Sprintf("%s/%d", submissionPath, id)
 	if _, err := os.Stat(submissionPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(submissionPath, os.ModePerm); err != nil {
