@@ -1,39 +1,77 @@
 # JudgeHost
 
-[![](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
+
+[![](https://img.shields.io/badge/Version-0.2.0-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
 
 这是基于 Go 的 Online Judge 平台的**判题服务器模块**, , 在 Linux 下运行
 
 本程序基于调用 QingdaoU / OnlineJudge 平台提供的**判题核心**来对题目结果进行判断, 即该判题服务器（JudgeHost）负责接收用户的提交并将代码**编译、运行、比较，并返回判断情况**其中，代码运行的核心被单独分离在这个仓库  [Judger Sandbox(Seccomp)](https://github.com/QingdaoU/Judger)
 
-
-后续会提供 **Docker 环境**作为运行环境
+提供 **Docker 环境**作为运行环境
 
 ### 快速上手
 
 ```shell
 git clone https://github.com/Cu1ii/JudgeHost.git
 ```
+**使用 docker**
 
-- 将 `src/scripts/` 下的 `compare.sh` 和 `compile.sh ` 移动到 `resource/config/judge-environment.yaml` 中配置的目录下
+使用 `grpc` 服务来实现对该判题服务器的调用
 
-- 启动后 执行
 
-  ```shell
-  curl "http://localhost:port/"
-  ```
+**手动构建镜像**
+```shell
+docker build . -t your-name
+docker run -d -p port:8000 -v your-volumn:/home/cu1/XOJ --name your-name your-image-name
+```
+**使用默认提供镜像**
+```shell
+docker run -d -p port:8000 -v your-volumn:/home/cu1/XOJ --name your-name cu1ii/judge-host:0.2.0
+```
+### 测试
 
-  检测是否成功
+```go
+package test
 
-- 测试判题可以使用该项目提供的 `/src/scripts/judge_test.sh` 来进行简单测试
+import (
+"context"
+"fmt"
+"github.com/sirupsen/logrus"
+"google.golang.org/grpc"
+"testing"
+)
 
-### 使用了
+func TestJudgeService(t *testing.T) {
 
-[![](https://img.shields.io/badge/gin-v1.8.1-%235698c3)](https://github.com/gin-gonic/gin) [![](https://img.shields.io/badge/logrus-v1.9.0-%23428675)](https://github.com/sirupsen/logrus) [![](https://img.shields.io/badge/ants-v2.6.0-%2315231b)](https://github.com/panjf2000/ants) [![](https://img.shields.io/badge/viper-%20v1.14.0-%23e2d849) ](https://github.com/spf13/viper))
+	logrus.Info("the judge server begin to run")
+
+	conn, err := grpc.Dial("your-host:your-port", grpc.WithInsecure())
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer conn.Close()
+	client := NewJudgeServiceClient(conn)
+	reply, err := client.Judge(context.Background(), &JudgeRequest{ProblemId: 1,
+		SubmissionId:    1,
+		SubmissionCode:  "#include <iostream>\n int main() { \n std::cout << \"hello world\" << std::endl; \n return 0; \n }",
+		ResolutionPath:  "",
+		TimeLimit:       1000,
+		MemoryLimit:     64,
+		OutputLimit:     0,
+		Language:        "C++",
+		JudgePreference: 0,
+		Spj:             false,
+	})
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	fmt.Println(*reply)
+}
+```
 
 ### 版本日志
 
-最新版本 `v0.1`
+最新版本 `v0.2.0`
 
 ### 其他
 
@@ -42,6 +80,7 @@ git clone https://github.com/Cu1ii/JudgeHost.git
 
 ### 待实现
 - [x] 实现 SPJ
+- [ ] 实现远程拉取判题数据
 
 ### Contributions
 

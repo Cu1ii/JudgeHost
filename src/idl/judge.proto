@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package judge;
+
+option go_package = "./src/judge";
+
+message JudgeRequest {
+  int64 problem_id = 1;
+  int64 submission_id = 2;
+  string submission_code = 3;
+  string resolution_path = 4;
+  int64 time_limit = 5;
+  int64 memory_limit = 6;
+  int64 output_limit = 7;
+  string language = 8;
+  int64 judge_preference = 9;
+  bool spj = 10;
+}
+
+message CaseStatus {
+  string result = 1;
+  int64 time = 2;
+  int64 memory = 3;
+  string testcase = 4;
+  string case_data = 5;
+  string output_data = 6;
+  string input_data = 7;
+  string user_output = 8;
+}
+
+message JudgeResponse {
+  int64 cpu_time = 1;
+  int64 memory = 2;
+  int64 result = 3;
+  string msg = 4;
+  repeated CaseStatus case_array = 5;
+  string testcase = 6;
+  int64 error = 7;
+}
+
+service JudgeService {
+  rpc Judge (JudgeRequest) returns (JudgeResponse);
+}

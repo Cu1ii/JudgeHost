@@ -2,7 +2,6 @@ package judge
 
 import (
 	"JudgeHost/src/global"
-	"JudgeHost/src/models/vo"
 	"JudgeHost/src/util"
 	"errors"
 	"fmt"
@@ -22,25 +21,36 @@ const (
 	SpecialJudgePath = "./scripts/spj.sh"
 )
 
+func RunJudge(request *JudgeRequest) (*JudgeResponse, error) {
+	return judge(request.SubmissionId,
+		request.MemoryLimit,
+		request.TimeLimit,
+		request.ResolutionPath,
+		request.SubmissionCode,
+		request.Language,
+		request.ProblemId,
+		request.JudgePreference,
+		request.Spj,
+	)
+}
+
 func judge(submitId,
 	memoryLimit,
-	timeLimit int,
+	timeLimit int64,
 	resolutionPath,
 	code,
 	language string,
-	problem int,
-	isOI int,
-	spj bool,
-	res *string) error {
+	problem,
+	isOI int64,
+	spj bool) (*JudgeResponse, error) {
 
-	rep := vo.ResponseVo{}
+	rep := JudgeResponse{}
 	logrus.Info("Begin to Compile!")
 	if success, r := compile(submitId, code, global.JudgeEnvironmentSetting.SubmissionPath, language); !success {
 		logrus.Debug("compile ", problem, " fail")
-		*res = r
-		return errors.New("compile" + strconv.FormatInt(int64(problem), 10) + "fail")
+		return r, errors.New("compile" + strconv.FormatInt(int64(problem), 10) + "fail")
 	}
-	// submitTime := submittime.Unix() // 似乎并没有什么用
+	//submitTime := submittime.Unix() // 似乎并没有什么用
 	//runPath := fmt.Sprintf("%s/%d/%d.out", XojSubmissionPath, id, id)
 	maxMemory := 0
 	maxTime := 0
@@ -57,35 +67,35 @@ func judge(submitId,
 	}
 	files, err := filepath.Glob(resolutionPath + "/*")
 	if err != nil || len(files) == 0 {
-		*res = doneProblem("get resolution error!",
+		res := doneProblem("get resolution error!",
 			0,
 			0,
 			5,
 			"?",
 			&rep)
 		logrus.Error(err)
-		return err
+		return res, err
 	}
 	zipPath := fmt.Sprintf("%s/%d.zip", resolutionPath, problem)
 	// resolutionPath + "/" + problem + ".zip"
 	if util.IsFileIn(zipPath) {
 		if isSuccess, err := util.UnZipInDictionary(zipPath, resolutionPath); !isSuccess || err != nil {
-			*res = doneProblem("unzip "+strconv.FormatInt(int64(problem), 10)+".zip error!",
+			res := doneProblem("unzip "+strconv.FormatInt(int64(problem), 10)+".zip error!",
 				0,
 				0,
 				5,
 				"?",
 				&rep)
-			return err
+			return res, err
 		}
 		if isSuccess, err := util.DeleteFile(zipPath, true); !isSuccess || err != nil {
-			*res = doneProblem("delete resolution zip error!",
+			res := doneProblem("delete resolution zip error!",
 				0,
 				0,
 				5,
 				"?",
 				&rep)
-			return err
+			return res, err
 		}
 	}
 	logrus.Info("resolution path = ", resolutionPath)
@@ -115,10 +125,10 @@ func judge(submitId,
 
 		outputPath := fmt.Sprintf("%s/%d/%d%s", global.JudgeEnvironmentSetting.SubmissionPath, submitId, idx, "temp.out")
 		inputPath := fmt.Sprintf("%s/%d.in", resolutionPath, idx)
-		result, err := singleJudge(
-			timeLimit,
-			memoryLimit,
-			submitId,
+		var result, err = singleJudge(
+			int(timeLimit),
+			int(memoryLimit),
+			int(submitId),
 			inputPath,
 			outputPath,
 			errorPath,
@@ -180,7 +190,7 @@ func judge(submitId,
 					myTime = result.CpuTime
 					myMemory = result.Memory
 				}
-				resultStr := util.TransformResultToString(result.Result)
+				resultStr := util.TransformResultToString(int64(result.Result))
 				//"unknown"
 				//if result.Result == 2 || result.Result == 1 {
 				//	resultStr = "Time Limit Exceeded"
@@ -258,7 +268,7 @@ func judge(submitId,
 					myTime = result.CpuTime
 					myMemory = result.Memory
 				}
-				resultStr := util.TransformResultToString(res)
+				resultStr := util.TransformResultToString(int64(res))
 				//"Unknown"
 				//if res == -5 {
 				//	resultStr = "Presentation Error"
@@ -281,7 +291,7 @@ func judge(submitId,
 				)
 				if isOI == 0 {
 					if result.Result == 5 || result.Result == 4 {
-						rep.Error = result.Error
+						rep.Error = int64(result.Error)
 					}
 					break
 				}
@@ -302,9 +312,9 @@ func judge(submitId,
 	}
 	// 汇总所有结果
 	if myResult == 100 {
-		*res = acProblem(maxMemory/1024/1024, maxTime, &rep)
+		rep = *acProblem(maxMemory/1024/1024, maxTime, &rep)
 	} else {
-		*res = doneProblem("",
+		rep = *doneProblem("",
 			myMemory/1024/1024,
 			myTime,
 			myResult,
@@ -315,7 +325,7 @@ func judge(submitId,
 	fmt.Sprintf("%s", myTestcase)
 
 	logrus.Info("All done!")
-	return nil
+	return &rep, nil
 }
 
 func singleJudge(timeLimit,

@@ -1,16 +1,16 @@
 package main
 
 import (
-	"JudgeHost/src/controllers"
 	"JudgeHost/src/global"
+	"JudgeHost/src/judge"
 	"JudgeHost/src/logs"
-	"JudgeHost/src/middleware"
 	"JudgeHost/src/setting"
 	"JudgeHost/src/util"
 	"JudgeHost/src/util/pool"
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"log"
+	"net"
 	"strconv"
 )
 
@@ -29,16 +29,6 @@ func init() {
 		logrus.Fatalf("init.validate err: %v", err)
 	}
 
-}
-
-func main() {
-	r := gin.Default()
-	r.Use(middleware.LogMiddleWare(global.Logger))
-	controllers.LoadControllers(r)
-	if err := r.Run(":" + strconv.FormatInt(int64(global.AppSetting.Port), 10)); err != nil {
-		fmt.Println("startup service failed, err:%v\n", err)
-	}
-	defer global.JudgeExecutorPool.Release()
 }
 
 func setupSetting() error {
@@ -64,3 +54,21 @@ func setupSetting() error {
 
 	return nil
 }
+
+func main() {
+	grpcServer := grpc.NewServer()
+	judge.RegisterJudgeServiceServer(grpcServer, new(judge.JudgeServiceImpl))
+	lis, err := net.Listen("tcp", ":"+strconv.FormatInt(int64(global.AppSetting.Port), 10))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = grpcServer.Serve(lis)
+}
+
+//defer global.JudgeExecutorPool.Release()
+//r := gin.Default()
+//r.Use(middleware.LogMiddleWare(global.Logger))
+//controllers.LoadControllers(r)
+//if err := r.Run(":" + strconv.FormatInt(int64(global.AppSetting.Port), 10)); err != nil {
+//fmt.Println("startup service failed, err:%v\n", err)
+//}
