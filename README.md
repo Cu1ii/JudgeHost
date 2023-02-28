@@ -1,6 +1,6 @@
 # JudgeHost
 
-[![](https://img.shields.io/badge/Version-v0.1-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
+[![](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
 
 这是基于 Go 的 Online Judge 平台的**判题服务器模块**, , 在 Linux 下运行
 
