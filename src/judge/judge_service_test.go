@@ -5,26 +5,24 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 	"testing"
 )
 
 func TestJudgeService(t *testing.T) {
 
-	go func() {
-		grpcServer := grpc.NewServer()
-		RegisterJudgeServiceServer(grpcServer, new(JudgeServiceImpl))
-		lis, err := net.Listen("tcp", ":8000")
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = grpcServer.Serve(lis)
-	}()
+	//go func() {
+	//	grpcServer := grpc.NewServer()
+	//	RegisterJudgeServiceServer(grpcServer, new(JudgeServiceImpl))
+	//	lis, err := net.Listen("tcp", ":8000")
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//	_ = grpcServer.Serve(lis)
+	//}()
 
 	logrus.Info("the judge server begin to run")
 
-	conn, err := grpc.Dial("localhost:8000", grpc.WithInsecure())
+	conn, err := grpc.Dial("47.100.227.175:8003", grpc.WithInsecure())
 	if err != nil {
 		logrus.Fatal(err)
 	}
