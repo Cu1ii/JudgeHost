@@ -3,7 +3,7 @@
 
 [![](https://img.shields.io/badge/Version-0.2.0-blue)](https://github.com/Cu1ii/JudgeHost) ![](https://img.shields.io/badge/go-1.19.3-brightgreen?logo=go)
 
-这是基于 Go 的 Online Judge 平台的**判题服务器模块**, , 在 Linux 下运行
+这是基于 Go 的 Online Judge 平台的**判题服务器模块**, , 在 Ubuntu20.04 下开发
 
 本程序基于调用 QingdaoU / OnlineJudge 平台提供的**判题核心**来对题目结果进行判断, 即该判题服务器（JudgeHost）负责接收用户的提交并将代码**编译、运行、比较，并返回判断情况**其中，代码运行的核心被单独分离在这个仓库  [Judger Sandbox(Seccomp)](https://github.com/QingdaoU/Judger)
 
